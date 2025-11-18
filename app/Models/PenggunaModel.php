@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\LoginModel;
 
 class PenggunaModel extends Model
@@ -20,12 +21,12 @@ class PenggunaModel extends Model
         'tanggal_daftar'
     ];
 
-    public function data_login() {
+    public function login(): HasOne {
         return $this->hasOne(LoginModel::class, 'id_pengguna', 'id_pengguna');
     }
     protected static function booted(): void {
         static::deleting(function(PenggunaModel $pengguna) {
-            $pengguna->data_login()?->delete();
+            $pengguna->login()?->delete();
         });
     }
 }

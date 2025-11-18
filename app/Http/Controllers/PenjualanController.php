@@ -24,6 +24,17 @@ class PenjualanController extends Controller
         
         return view('halaman.penjualan', ['barang' => $barang]); 
     }
+    
+    // Penjualan
+    public function daftarTransaksiPenjualan() {
+        $data = TransaksiPenjualanModel::with('pelanggan', 'pengguna')->get();
+        return view('halaman.daftar-transaksi-penjualan', ['daftar_penjualan' => $data]);
+    }
+    public function detailTransaksiPenjualan(Request $request) {
+        $data = DetailTransaksiPenjualanModel::find($request->id_penjualan);
+        
+        return view('halaman.daftar-transaksi-penjualan');
+    }
     public function addToCart(Request $request)
     {   
         $barang = BarangModel::find($request->id_barang);
@@ -72,8 +83,8 @@ class PenjualanController extends Controller
 
         try {
             $urutan_pelanggan = PelangganModel::count() + 1;
-            $format_urutan = sprintf("%03d", $urutan_pelanggan); // Hasil: "001"
-            $id_pelanggan = "PEL-" . $format_urutan;     // Hasil: "PEL-001"
+            $format_urutan = sprintf("%03d", $urutan_pelanggan);
+            $id_pelanggan = "PEL-" . $format_urutan;
 
             $pelanggan = PelangganModel::firstOrCreate([
                 'kontak_pelanggan' => $request->telepon,
@@ -128,31 +139,13 @@ class PenjualanController extends Controller
             return back()->with('error', 'Terjadi kesalahan saat menyimpan transaksi: ' . $e->getMessage());
         }
     }
-    public function dashboard() {
-        $barang = BarangModel::all();
+    public function hapusTransaksi(TransaksiPenjualanModel $penjualan) {
+        try {
+            $penjualan->delete();
 
-        $query_pembelian = TransaksiPembelianModel::query();
-        $query_penjualan = TransaksiPenjualanModel::query();
-
-        $total_pendapatan_raw = (clone $query_penjualan)->sum('total_harga');
-        $total_pengeluaran_raw = (clone $query_pembelian)->sum('total_harga');
-
-        $total_transaksi = (clone $query_penjualan)->count() + (clone $query_pembelian)->count();
-
-        // Mengubah Format
-        $total_pendapatan = "Rp " . number_format($total_pendapatan_raw, 0, ',', '.');
-        $total_pengeluaran = "Rp " . number_format($total_pengeluaran_raw, 0, ',', '.');
-        $total_keuntungan = "Rp " . number_format($total_pendapatan_raw - $total_pengeluaran_raw, 0, ',', '.');
-        
-        $transaksi_pembelian = $query_pembelian->get();
-
-        return view('halaman.dashboard', [
-            'barang' => $barang,
-            'total_transaksi' => $total_transaksi,
-            'total_pendapatan' => $total_pendapatan,
-            'total_keuntungan' => $total_keuntungan,
-            'total_pengeluaran' => $total_pengeluaran,
-            'transaksi_pembelian' => $transaksi_pembelian
-        ]);
+            return redirect()->route('daftar.penjualan')->with('success', 'Transaksi berhasil dihapus!');
+        }catch(Exception $e) {
+            return back()->with('error', 'Error : ' . $e->getMessage());
+        }
     }
 }

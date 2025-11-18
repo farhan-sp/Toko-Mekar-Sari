@@ -28,7 +28,7 @@ Route::middleware(['auth', 'hapus-sesi'])->group(function() {
     // Pemilik Toko
     Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna');
     Route::post('/pengguna/tambah-pengguna', [PenggunaController::class, 'tambahPengguna'])->name('pengguna.tambah-pengguna');
-    Route::delete('/pengguna/hapus-pengguna/{pengguna}', [PenggunaController::class, 'hapusPengguna'])->name('pengguna.hapus-pengguna');
+    Route::put('/pengguna/update/{pengguna}', [PenggunaController::class, 'update'])->name('pengguna.update');
 
     // Kepala Toko
     Route::get('/dashboard', [LaporanController::class, 'dashboard'])->name('dashboard');
@@ -39,9 +39,12 @@ Route::middleware(['auth', 'hapus-sesi'])->group(function() {
     Route::post('/pembelian/tambah-barang', [BarangController::class, 'tambahBarang'])->name('pembelian.tambah-barang');
 
     Route::get('/barang', [BarangController::class, 'index'])->name('barang.index');
+    Route::delete('/barang/hapus/{barang}', [BarangController::class, 'delete'])->name('barang.hapus');
+    Route::put('/barang/update/{barang}', [BarangController::class, 'update'])->name('barang.update');
 
-    Route::get('/daftar/pembelian', [LaporanController::class, 'daftarTransaksiPembelian'])->name('daftar.pembelian');
-    Route::post('/daftar/pembelian/detail', [LaporanController::class, 'detailTransaksiPembelian'])->name('detail.pembelian');
+    Route::get('/daftar/pembelian', [PembelianController::class, 'daftarTransaksiPembelian'])->name('daftar.pembelian');
+    Route::post('/daftar/pembelian/detail', [PembelianController::class, 'detailTransaksiPembelian'])->name('detail.pembelian');
+    Route::delete('/daftar/pembelian/hapus/{pembelian}', [PembelianController::class, 'hapusTransaksi'])->name('hapus.pembelian');
 
     // Kasir
     Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
@@ -49,6 +52,7 @@ Route::middleware(['auth', 'hapus-sesi'])->group(function() {
     Route::post('/penjualan/cart/clear', [PenjualanController::class, 'clearCart'])->name('penjualan.cart.clear');
     Route::post('/penjualan/store', [PenjualanController::class, 'storeTransaction'])->name('penjualan.store');
 
-    Route::get('/daftar/penjualan', [LaporanController::class, 'daftarTransaksiPenjualan'])->name('daftar.penjualan');
-    Route::post('/daftar/penjualan/detail', [LaporanController::class, 'detailTransaksiPenjualan'])->name('detail.penjualan');
+    Route::get('/daftar/penjualan', [PenjualanController::class, 'daftarTransaksiPenjualan'])->name('daftar.penjualan');
+    Route::post('/daftar/penjualan/detail', [PenjualanController::class, 'detailTransaksiPenjualan'])->name('detail.penjualan');
+    Route::delete('/daftar/penjualan/hapus/{penjualan}', [PenjualanController::class, 'hapusTransaksi'])->name('hapus.penjualan');
 });

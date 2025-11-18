@@ -62,7 +62,6 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
         <!-- Grid 1: Transaksi Penjualan -->
         <div class="bg-white rounded-xl p-6 shadow-xl h-96 flex flex-col justify-between">
             <h4 class="font-semibold text-lg mb-4 text-green-700">Daftar Transaksi Penjualan Terbaru</h4>
@@ -129,25 +128,21 @@
 @push('script')
 <script src=" https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js "></script>
 <script>
-    // Pastikan dokumen sudah dimuat sebelum menjalankan skrip
     document.addEventListener('DOMContentLoaded', function() {
-        // Data untuk grafik
         const labels = @json($chart_label);
         const dataPenjualan = @json($chart_penjualan);
         const dataPembelian = @json($chart_pembelian);
 
         const ctx = document.getElementById('salesChart').getContext('2d');
 
-        // Membuat instance grafik garis baru
         new Chart(ctx, {
-            type: 'line', // Kunci perubahan: diubah dari 'bar' menjadi 'line'
+            type: 'line',
             data: {
                 labels: labels,
                 datasets: [
                     {
                     label: 'Penjualan',
                     data: dataPenjualan,
-                    // Styling untuk garis
                     borderColor: 'rgb(16, 185, 129)', // Warna garis (Emerald 500)
                     backgroundColor: 'rgba(0, 124, 85, 0.38)', // Warna area di bawah garis
                     tension: 0.4, // Membuat garis terlihat melengkung (smoothing)
@@ -172,15 +167,6 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false, 
-                scales: {
-                    y: {
-                        beginAtZero: false, // Boleh tidak dimulai dari nol untuk fokus pada variasi data
-                        title: {
-                            display: true,
-                            text: 'Nilai (Juta Rp)'
-                        }
-                    }
-                },
                 plugins: {
                     legend: {
                         display: true,

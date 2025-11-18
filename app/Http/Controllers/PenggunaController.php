@@ -71,15 +71,6 @@ class PenggunaController extends Controller
             return back()->with('error', 'Error : ' . $e->getMessage());
         }
     }
-    public function hapusPengguna(PenggunaModel $pengguna) {
-        try {
-            $pengguna->delete();
-
-            return redirect()->route('pengguna')->with('success', 'Pengguna berhasil dihapus!');
-        }catch(Exception $e) {
-            return back()->with('error', 'Error : ' . $e->getMessage());
-        }
-    }
     public function logout(Request $request) {
         Auth::logout();
 
@@ -87,5 +78,31 @@ class PenggunaController extends Controller
         $request->session()->regenerateToken();
         
         return redirect('/login');
+    }
+    public function statusUpdate(Request $request, PenggunaModel $pengguna)
+    {
+        try {
+            $pengguna->nama_pengguna = $request['status'];
+
+            $pengguna->save();
+
+            return back()->with('success', 'Status Pengguna diperbarui!');
+        } catch (Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat memperbarui: ' . $e->getMessage());
+        }
+    }
+    public function update(Request $request, PenggunaModel $pengguna)
+    {
+        try {
+            $pengguna->nama_pengguna = $request['nama'];
+            $pengguna->tipe_pekerjaan = $request['pekerjaan'];
+            $pengguna->kontak_pengguna = $request['telepon'];
+
+            $pengguna->save();
+
+            return back()->with('success', 'Data pengguna berhasil diperbarui.');
+        } catch (Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat memperbarui: ' . $e->getMessage());
+        }
     }
 }
