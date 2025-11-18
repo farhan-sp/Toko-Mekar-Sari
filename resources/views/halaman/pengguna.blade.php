@@ -4,7 +4,7 @@
 @section('judul-halaman', 'Pengaturan Pengguna')
 @section('isi-content')
 
-<main class="flex-1 p-6 overflow-auto" x-data="{ showAddModal: false }">
+<main class="flex-1 p-6 overflow-auto" x-data="{ showAddModal1: false, showAddModal2: false }">
     @if (session('success'))
         <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
         {{ session('success') }}
@@ -21,7 +21,7 @@
 
     <div class="flex justify-end mb-4">
         <button 
-            @@click="showAddModal = true"
+            @click="showAddModal1 = true"
             class="bg-black text-white px-4 py-2 rounded-md text-sm"
         >
             Tambah Pengguna
@@ -39,15 +39,23 @@
                 </div>
             </div>
             <p class="text-gray-500 text-sm mt-2">Telepon: {{ $user['kontak_pengguna'] }}</p>
-            <p class="text-gray-500 text-sm">Terdaftar: {{ $user['terdaftar'] }}</p>
+            <p class="text-gray-500 text-sm">Terdaftar: {{ \Carbon\Carbon::parse($user['tanggal_daftar'])->format('d-m-Y') }}</p>
             
             <div class="mt-4 flex gap-2">
-                <!-- Update Pengguna -->
-                <a href="#" class="border px-2 py-1 rounded text-sm flex-1 text-center">Edit</a>
-                
-                <!-- Hapus Pengguna -->
+                <button 
+                    type="button"
+                    @click="showAddModal2 = true"
+                    class="
+                        flex-1
+                        bg-black text-white px-4 py-2 rounded-md text-sm text-center
+                        hover:bg-gray-800 transition-colors duration-200
+                    "
+                >
+                    Edit
+                </button>
+
                 <form 
-                    action="{{ route('pengguna.hapus-pengguna', $user['id_pengguna']) }}" 
+                    action="" 
                     method="POST" 
                     class="flex-1"
                     onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?');"
@@ -55,8 +63,15 @@
                     @csrf
                     @method('DELETE')
                     
-                    <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-sm text-center w-full">
-                        Hapus
+                    <button 
+                        type="submit" 
+                        class="
+                            w-full
+                            bg-red-600 text-white px-4 py-2 rounded-md text-sm text-center
+                            hover:bg-red-700 transition-colors duration-200
+                        "
+                    >
+                        Nonaktifkan
                     </button>
                 </form>
             </div>
@@ -66,7 +81,7 @@
 
     <!-- Daftar Pengguna -->
     <div 
-        x-show="showAddModal" 
+        x-show="showAddModal1" 
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
@@ -77,10 +92,10 @@
         style="display: none;"
     >    
         <div 
-            @click.outside="showAddModal = false; step = 1; nama = ''; role = ''; telepon = ''"
+            @click.outside="showAddModal1 = false; step = 1; nama = ''; role = ''; telepon = ''"
             x-data="{ step: 1, nama: '', role: '', telepon: '' }"
 
-            x-show="showAddModal"
+            x-show="showAddModal1"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 transform scale-90"
             x-transition:enter-end="opacity-100 transform scale-100"
@@ -91,7 +106,7 @@
         >
             <div class="flex justify-between items-center p-4 border-b">
                 <h4 class="font-semibold text-gray-700">Tambah Pengguna Baru</h4>
-                <button @click="showAddModal = false; step = 1; nama = ''; role = ''; telepon = ''" class="text-gray-400 hover:text-gray-600">
+                <button @click="showAddModal1 = false; step = 1; nama = ''; role = ''; telepon = ''" class="text-gray-400 hover:text-gray-600">
                     <i class="fa-solid fa-xmark fa-lg"></i>
                 </button>
             </div>
@@ -111,11 +126,9 @@
                         <label for="jenis_pekerjaan" class="block text-sm font-medium text-gray-700 mb-1">Jenis Pekerjaan</label>
                         <select id="jenis_pekerjaan" name="pekerjaan" x-model="role" class="w-full border rounded-md p-2 text-sm bg-white" required>
                             <option value="" disabled selected>Pilih jenis pekerjaan</option>
-                            @foreach ($pengguna as $tipe)
-                                @if ($tipe->tipe_pekerjaan != 'pemilik')
-                                    <option value="{{ $tipe->tipe_pekerjaan }}">{{ $tipe->tipe_pekerjaan }}</option>
-                                @endif
-                            @endforeach
+                            <option value="pemilik">Pemilik</option>
+                            <option value="kepala toko">Kepala Toko</option>
+                            <option value="kasir">Kasir</option>
                         </select>
                     </div>
                     
@@ -141,7 +154,7 @@
                 </div>
                 
                 <div x-show="step === 1" class="p-4 border-t text-right bg-gray-50 rounded-b-lg">
-                    <button type="button" @click="showAddModal = false; step = 1; nama = ''; role = ''; telepon = ''" class="border px-4 py-2 rounded-md text-sm mr-2 hover:bg-gray-100">
+                    <button type="button" @click="showAddModal1 = false; step = 1; nama = ''; role = ''; telepon = ''" class="border px-4 py-2 rounded-md text-sm mr-2 hover:bg-gray-100">
                         Batal
                     </button>
                     <button 
@@ -160,7 +173,77 @@
                         Kembali
                     </button>
                     <div>
-                        <button type="button" @click="showAddModal = false; step = 1; nama = ''; role = ''; telepon = ''" class="border px-4 py-2 rounded-md text-sm mr-2 hover:bg-gray-100">
+                        <button type="button" @click="showAddModal1 = false; step = 1; nama = ''; role = ''; telepon = ''" class="border px-4 py-2 rounded-md text-sm mr-2 hover:bg-gray-100">
+                            Batal
+                        </button>
+                        <button type="submit" class="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
+                            Simpan Pengguna
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Update Pengguna -->
+    <div 
+        x-show="showAddModal2" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+        style="display: none;"
+    >    
+        <div 
+            @click.outside="showAddModal2 = false; step = 1; nama = ''; role = ''; telepon = ''"
+            x-data="{ step: 1, nama: '', role: '', telepon: '' }"
+        >
+            <div class="flex justify-between items-center p-4 border-b">
+                <h4 class="font-semibold text-gray-700">Update Pengguna</h4>
+                <button @click="showAddModal2 = false; step = 1; nama = ''; role = ''; telepon = ''" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark fa-lg"></i>
+                </button>
+            </div>
+
+            <form action="{{ route('pengguna.update', ['pengguna' => $user->id_pengguna]) }}" method="POST"> 
+                @csrf
+                @method('PUT')
+                
+                <div x-show="step === 1" class="p-5 space-y-4">
+                    <!-- Nama -->
+                    <div>
+                        <label for="nama_pengguna" class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
+                        <input type="text" id="nama_pengguna" name="nama" x-model="nama" class="w-full border rounded-md p-2 text-sm" placeholder="Masukkan nama lengkap" required>
+                    </div>
+                    
+                    <!-- Jenis Pekerjaan -->
+                    <div>
+                        <label for="jenis_pekerjaan" class="block text-sm font-medium text-gray-700 mb-1">Jenis Pekerjaan</label>
+                        <select id="jenis_pekerjaan" name="pekerjaan" x-model="role" class="w-full border rounded-md p-2 text-sm bg-white" required>
+                            <option value="" disabled selected>Pilih jenis pekerjaan</option>
+                            <option value="pemilik">Pemilik</option>
+                            <option value="kepala toko">Kepala Toko</option>
+                            <option value="kasir">Kasir</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Telepon -->
+                    <div>
+                        <label for="telepon" class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
+                        <input type="tel" id="telepon" name="telepon" x-model="telepon" class="w-full border rounded-md p-2 text-sm" placeholder="Contoh: 08123456789" required>
+                    </div>
+                </div>
+
+
+                <div x-show="step === 1" class="p-4 border-t text-right bg-gray-50 rounded-b-lg flex justify-between">
+                    <button type="button" @click="step = 1" class="border px-4 py-2 rounded-md text-sm hover:bg-gray-100">
+                        Kembali
+                    </button>
+                    <div>
+                        <button type="button" @click="showAddModal2 = false; step = 1; nama = ''; role = ''; telepon = ''" class="border px-4 py-2 rounded-md text-sm mr-2 hover:bg-gray-100">
                             Batal
                         </button>
                         <button type="submit" class="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800">

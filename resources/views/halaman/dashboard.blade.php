@@ -31,9 +31,9 @@
     <!-- Bagian 2: Tampilan Aksi Cepat (Lihat Stok, Beli, Statistik) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="bg-white border rounded-xl p-4 shadow-sm">
-            <h3 class="font-semibold mb-2">Lihat Stok Barang</h3>
+            <h3 class="font-semibold mb-2">Lihat Daftar Barang</h3>
             <p class="text-sm text-gray-600 mb-4">Kelola dan pantau stok barang material Anda</p>
-            <a href="{{ route('pembelian.index') }}">
+            <a href="{{ route('barang.index') }}">
                 <button class="bg-gray-900 text-white px-4 py-2 rounded-md w-full hover:bg-gray-700">
                     Kelola Stok
                 </button>
@@ -104,7 +104,7 @@
                 </ul>
             </div>
             
-            <a href="{{ route('maintenance') }}" class="bg-gray-900 text-white px-4 py-2 rounded-md w-full hover:bg-gray-700 text-center">
+            <a href="{{ route('daftar.pembelian') }}" class="bg-gray-900 text-white px-4 py-2 rounded-md w-full hover:bg-gray-700 text-center">
                 Lihat Semua Transaksi
             </a>
         </div>

@@ -5,6 +5,18 @@
 <main>
     <div class="rounded-xl p-6 flex flex-col justify-between">
         <h4 class="font-semibold text-lg mb-4 text-green-700">Daftar Transaksi Penjualan</h4>
+        
+        @if (session('success'))
+            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+            {{ session('success') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+            {{ session('error') }}
+            </div>
+        @endif
+
         <div class="flex-grow overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 border border-gray-200">
                 <thead class="bg-white">
@@ -20,12 +32,24 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach ($daftar_penjualan as $penjualan)
                         <tr>
-                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ optional($penjualan->data_pelanggan)->nama_pelanggan }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ optional($penjualan->pelanggan)->nama_pelanggan }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ \Carbon\Carbon::parse($penjualan->tanggal_transaksi_penjualan)->format('d-m-Y') }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-sm text-green-500 font-semibold">{{ $penjualan->total_harga }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ optional($penjualan->data_pengguna)->nama_pengguna }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ optional($penjualan->pengguna)->nama_pengguna }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                                <button>Hapus</button>
+                                <form 
+                                    action="{{ route('hapus.penjualan', $penjualan['id_transaksi_penjualan']) }}" 
+                                    method="POST" 
+                                    class="flex-1"
+                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus transaksi ini?');"
+                                >
+                                    @csrf
+                                    @method('DELETE')
+                                    
+                                    <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-sm text-center w-full">
+                                        Hapus
+                                    </button>
+                                </form>
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                                 <button>Edit</button>

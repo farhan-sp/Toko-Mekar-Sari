@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\ {
     KategoriModel,
     BarangModel,
-    TransaksiPenjualanModel,
     TransaksiPembelianModel,
+    TransaksiPenjualanModel,
     DetailTransaksiPembelianModel,
     SupplierModel
 };
@@ -34,7 +34,16 @@ class PembelianController extends Controller
         
         return view('halaman.pembelian', ['kategori' => $kategori, 'barang' => $barang, 'barang_restok' => $perlu_restok, 'supplier' => $supplier]); 
     }
-
+    // Pembelian
+    public function daftarTransaksiPembelian() {
+        $data = TransaksiPembelianModel::with('supplier', 'pengguna')->get();
+        return view('halaman.daftar-transaksi-pembelian', ['daftar_pembelian' => $data]);
+    }
+    public function detailTransaksiPembelian(Request $request) {
+        $data = DetailTransaksiPembelianModel::find($request->id_pembelian);
+        
+        return view('halaman.daftar-transaksi-Pembelian');
+    }
     public function storeTransaction(Request $request)
     {
         $barang = BarangModel::find($request->id_barang);
@@ -77,6 +86,15 @@ class PembelianController extends Controller
             DB::rollBack();
             
             return back()->with('error', 'Terjadi kesalahan saat menyimpan transaksi: ' . $e->getMessage());
+        }
+    }
+    public function hapusTransaksi(TransaksiPembelianModel $pembelian) {
+        try {
+            $pembelian->delete();
+
+            return redirect()->route('daftar.pembelian')->with('success', 'Transaksi berhasil dihapus!');
+        }catch(Exception $e) {
+            return back()->with('error', 'Error : ' . $e->getMessage());
         }
     }
 }

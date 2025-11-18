@@ -56,10 +56,6 @@ class LaporanController extends Controller
 
         $total_transaksi = (clone $query_penjualan)->count() + (clone $query_pembelian)->count();
 
-        $total_pendapatan = "Rp " . number_format($total_pendapatan_raw, 0, ',', '.');
-        $total_pengeluaran = "Rp " . number_format($total_pengeluaran_raw, 0, ',', '.');
-        $total_keuntungan = "Rp " . number_format($total_pendapatan_raw - $total_pengeluaran_raw, 0, ',', '.');
-
         $chart_labels = [];
         $chart_data_penjualan = [];
         $chart_data_pembelian = [];
@@ -89,7 +85,6 @@ class LaporanController extends Controller
             // Format Chart
             for ($i = 1; $i <= 12; $i++) {
                 $chart_labels[] = date('M', mktime(0, 0, 0, $i, 1));
-                // Gunakan nama variabel yang konsisten
                 $chart_data_penjualan[] = (float)($data_penjualan_grup[$i] ?? 0);
                 $chart_data_pembelian[] = (float)($data_pembelian_grup[$i] ?? 0);
             }
@@ -118,7 +113,6 @@ class LaporanController extends Controller
                 ->pluck('total', 'grup')
                 ->all();
 
-            // Format Chart
             $daysInMonth = now()->daysInMonth;
             for ($i = 1; $i <= $daysInMonth; $i++) {
                 $chart_labels[] = $i;
@@ -129,6 +123,10 @@ class LaporanController extends Controller
 
         $transaksi_penjualan = $query_penjualan->get();
         $transaksi_pembelian = $query_pembelian->get();
+
+        $total_keuntungan = "Rp " . number_format($transaksi_penjualan->sum('total_harga') - $transaksi_pembelian->sum('total_harga'), 0, ',', '.');
+        $total_pendapatan = "Rp " . number_format($transaksi_penjualan->sum('total_harga'), 0, ',', '.');
+        $total_pengeluaran = "Rp " . number_format($transaksi_pembelian->sum('total_harga'), 0, ',', '.');
 
         return view('halaman.laporan', [
             'total_keuntungan' => $total_keuntungan,
@@ -145,27 +143,5 @@ class LaporanController extends Controller
 
             'periode' => $periode
         ]);
-    }
-
-    // Penjualan
-    public function daftarTransaksiPenjualan() {
-        $data = TransaksiPenjualanModel::with('data_pelanggan', 'data_pengguna')->get();
-        return view('halaman.daftar-transaksi-penjualan', ['daftar_penjualan' => $data]);
-    }
-    public function detailTransaksiPenjualan(Request $request) {
-        $data = DetailTransaksiPenjualanModel::find($request->id_penjualan);
-        
-        return view('halaman.daftar-transaksi-penjualan');
-    }
-
-    // Pembelian
-    public function daftarTransaksiPembelian() {
-        $data = TransaksiPembelianModel::with('data_supplier', 'data_pengguna')->get();
-        return view('halaman.daftar-transaksi-pembelian', ['daftar_pembelian' => $data]);
-    }
-    public function detailTransaksiPembelian(Request $request) {
-        $data = DetailTransaksiPembelianModel::find($request->id_pembelian);
-        
-        return view('halaman.daftar-transaksi-Pembelian');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SupplierModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -26,7 +27,10 @@ class BarangController
 
         $data = $pengurutan_data->sortKeys();
 
-        return view('halaman.daftar-barang', ['data' => $data]);
+        $kategori = KategoriModel::all();
+        $supplier = SupplierModel::all();
+
+        return view('halaman.daftar-barang', ['data' => $data, 'supplier_list' => $supplier, 'kategori_list' => $kategori]);
     }
     public function tambahBarang(Request $request) {
         DB::beginTransaction();
@@ -49,6 +53,7 @@ class BarangController
             ]);
 
             DB::commit();
+            return redirect()->route('pembelian.index')->with('success', 'Barang berhasil disimpan!');
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -69,10 +74,46 @@ class BarangController
             ]);
 
             DB::commit();
+            return redirect()->route('pembelian.index')->with('success', 'Kategori berhasil disimpan!');
         } catch (Exception $e) {
             DB::rollBack();
 
             return back()->with('error', 'Error : ' . $e->getMessage());
+        }
+    }
+    public function update(Request $request, $id_barang)
+    {
+        try {
+            $barang = BarangModel::findOrFail($id_barang);
+
+            $barang->update([
+                'id_kategori' => $request['id_kategori'],
+                'id_supplier' => $request['id_supplier'],
+                'nama_barang' => $request['nama_barang'],
+                'harga_jual' => $request['harga_jual'],
+                'harga_beli' => $request['harga_beli'],
+                'jumlah_stok_barang' => $request['stok'],
+                'stok_minimal' => $request['stok_minimal'],
+                'satuan' => $request['satuan'],
+            ]);
+
+            return back()->with('success', 'Data barang berhasil diperbarui.');
+
+        } catch (Exception $e) {
+            return back()->with('error', 'Gagal memperbarui barang: ' . $e->getMessage());
+        }
+    }
+
+    public function delete($id_barang)
+    {
+        try {
+            $barang = BarangModel::findOrFail($id_barang);
+            $barang->delete();
+
+            return back()->with('success', 'Barang berhasil dihapus.');
+            
+        } catch (Exception $e) {
+            return back()->with('error', 'Gagal menghapus barang: ' . $e->getMessage());
         }
     }
 }
