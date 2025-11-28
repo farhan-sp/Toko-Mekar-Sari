@@ -27,13 +27,13 @@ class PenjualanController extends Controller
     
     // Penjualan
     public function daftarTransaksiPenjualan() {
-        $data = TransaksiPenjualanModel::with('pelanggan', 'pengguna')->get();
-        return view('halaman.daftar-transaksi-penjualan', ['daftar_penjualan' => $data]);
-    }
-    public function detailTransaksiPenjualan(Request $request) {
-        $data = DetailTransaksiPenjualanModel::find($request->id_penjualan);
-        
-        return view('halaman.daftar-transaksi-penjualan');
+        $daftar_penjualan = TransaksiPenjualanModel::with([
+            'pelanggan', 
+            'pengguna', 
+            'detailPenjualan.barang'
+        ])->orderBy('tanggal_transaksi_penjualan', 'desc')->get();
+
+        return view('halaman.daftar-transaksi-penjualan', ['daftar_penjualan' => $daftar_penjualan]);
     }
     public function addToCart(Request $request)
     {   
@@ -73,24 +73,17 @@ class PenjualanController extends Controller
     {
         $cart = session()->get('cart');
 
-        // Jika keranjang kosong
         if(!$cart || count($cart) == 0) {
             return back()->with('error', 'Keranjang belanja kosong, tidak ada transaksi yang disimpan.');
         }
 
-        // Mulai Database Transaction
         DB::beginTransaction();
 
         try {
-            $urutan_pelanggan = PelangganModel::count() + 1;
-            $format_urutan = sprintf("%03d", $urutan_pelanggan);
-            $id_pelanggan = "PEL-" . $format_urutan;
-
             $pelanggan = PelangganModel::firstOrCreate([
                 'kontak_pelanggan' => $request->telepon,
             ],
             [
-                'id_pelanggan' =>  $id_pelanggan,
                 'nama_pelanggan' => $request->nama,
                 'alamat' => $request->alamat
             ]);
@@ -100,32 +93,40 @@ class PenjualanController extends Controller
                 $total_harga += $details['harga'] * $details['jumlah'];
             }
             
-            $urutan_transaksi = TransaksiPenjualanModel::count() + 1;
-            $format_urutan = sprintf("%03d", $urutan_transaksi);
-            $id_transaksi = "TRJ-" . $format_urutan;
-
-            $pengguna_pembuat = Auth::user()->getAttribute('id_pengguna');
-            $penjualan = TransaksiPenjualanModel::create([
-                'id_transaksi_penjualan' =>  $id_transaksi,
-                'id_pengguna_pembuat' => $pengguna_pembuat,
+            $id_temp = "TEMP-" . uniqid();
+            $user = Auth::user();
+            $transaksi_penjualan = TransaksiPenjualanModel::create([
+                'kode_transaksi_penjualan' => $id_temp,
+                'id_pengguna_pembuat' => $user->pengguna()->get()->first()->id_pengguna,
                 'id_pelanggan'  => $pelanggan->id_pelanggan,
                 'total_harga'   => $total_harga,
                 'tanggal_transaksi_penjualan' => now(),
             ]);
             
-            $urutan_detail_transaksi = DetailTransaksiPenjualanModel::count() + 1;
+            $kode = $transaksi_penjualan->id_transaksi_penjualan;
+            $kode_transaksi_penjualan = 'PEN-' . sprintf('%10d', $kode);
+
+            $transaksi_penjualan->update([
+                'kode_transaksi_penjualan' => $kode_transaksi_penjualan
+            ]);
+            
             foreach ($cart as $id_barang => $details) {
-                $format_urutan = sprintf("%03d", $urutan_detail_transaksi);
-                $id_detail_transaksi = "DTRJ-" . $format_urutan;
-                $cek = DetailTransaksiPenjualanModel::create([
-                    'id_detail_transaksi_penjualan' => $id_detail_transaksi,
-                    'id_transaksi_penjualan' => $penjualan->id_transaksi_penjualan, 
+                $id_temp = "TEMP-" . uniqid();
+                $detail_transaksi_penjualan = DetailTransaksiPenjualanModel::create([
+                    'kode_detail_transaksi_penjualan' => $id_temp,
+                    'id_transaksi_penjualan' => $transaksi_penjualan->id_transaksi_penjualan, 
                     'id_barang' => $id_barang,
                     'jumlah_barang' => $details['jumlah'],
                     'harga_perbarang' => $details['harga'],
                     'subtotal' => $details['harga'] * $details['jumlah'],
                 ]);
-                $urutan_detail_transaksi += 1;
+
+                $kode = $detail_transaksi_penjualan->id_detail_transaksi_penjualan;
+                $kode_detail_transaksi_penjualan = 'PEN-' . sprintf('%10d', $kode);
+
+                $detail_transaksi_penjualan->update([
+                    'kode_detail_transaksi_penjualan' => $kode_detail_transaksi_penjualan
+                ]);
             }
 
             DB::commit();

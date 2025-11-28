@@ -3,30 +3,42 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\{
+    BelongsTo,
+    HasMany,
+};
 use App\Models\LoginModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+use App\Models\{
+    TransaksiPembelianModel,
+    TransaksiPenjualanModel,
+};
 
 class PenggunaModel extends Model
 {
+    use SoftDeletes;
     protected $table = "pengguna";
     protected $primaryKey = "id_pengguna";
     public $timestamps = false;
-    public $incrementing = false;
-    protected $keyType = "string";
     protected $fillable = [
         'id_pengguna',
+        'id_login',
+        'status',
         'nama_pengguna',
         'tipe_pekerjaan',
         'kontak_pengguna',
-        'tanggal_daftar'
+        'tanggal_terdaftar',
+        'tanggal_nonaktif'
     ];
 
-    public function login(): HasOne {
-        return $this->hasOne(LoginModel::class, 'id_pengguna', 'id_pengguna');
+    public function login(): BelongsTo {
+        return $this->belongsTo(LoginModel::class, 'id_login', 'id_login');
     }
-    protected static function booted(): void {
-        static::deleting(function(PenggunaModel $pengguna) {
-            $pengguna->login()?->delete();
-        });
+    public function penjualan(): HasMany {
+        return $this->hasMany(TransaksiPenjualanModel::class, 'id_pengguna_pembuat', 'id_pengguna');
+    }
+    public function pembelian(): HasMany {
+        return $this->hasMany(TransaksiPembelianModel::class, 'id_pengguna_pembuat', 'id_pengguna');
     }
 }

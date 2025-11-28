@@ -1,77 +1,102 @@
 @extends('layouts.app')
 
-
 @section('judul-halaman', 'Pengaturan Pengguna')
 @section('isi-content')
 
-<main class="flex-1 p-6 overflow-auto" x-data="{ showAddModal1: false, showAddModal2: false }">
+<main class="flex-1 p-6 overflow-auto" x-data="{ 
+    showAddModal: false, 
+    showEditModal: false, 
+    selectedPengguna: null,
+}">
+
+    {{-- Notifikasi --}}
     @if (session('success'))
-        <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-        {{ session('success') }}
+        <div class="flex items-center p-4 mb-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-50" role="alert">
+            <i class="fa-solid fa-circle-check mr-2"></i> {{ session('success') }}
         </div>
     @endif
     @if (session('error'))
-        <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-        {{ session('error') }}
+        <div class="flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50" role="alert">
+            <i class="fa-solid fa-circle-exclamation mr-2"></i> {{ session('error') }}
         </div>
     @endif
 
-    <h3 class="text-lg font-bold mb-1">Pengaturan Pengguna</h3>
-    <p class="text-gray-500 mb-4 text-sm">Kelola pengguna sistem dan hak akses</p>
-
-    <div class="flex justify-end mb-4">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Manajemen Pengguna</h1>
+            <p class="text-sm text-gray-500 mt-1">Kelola akses staff dan administrator toko.</p>
+        </div>
         <button 
-            @click="showAddModal1 = true"
-            class="bg-black text-white px-4 py-2 rounded-md text-sm"
+            @click="showAddModal = true"
+            class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition shadow-sm flex items-center gap-2"
         >
-            Tambah Pengguna
+            <i class="fa-solid fa-user-plus"></i> Tambah Pengguna
         </button>
     </div>
 
-    <div class="grid grid-cols-3 gap-6">
+    <!-- GRID CARD PENGGUNA -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($pengguna as $user)
-        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-md w-full mx-auto mb-8">
-            <div class="flex items-center justify-between mb-2">
-                <div>
-                    <h5 class="font-semibold">{{ $user['nama_pengguna'] }}</h5>
-                    <span class="mt-1 inline-block px-2 py-1 text-xs text-white rounded 
-                    {{ $user['tipe_pekerjaan'] == 'pemilik' ? 'bg-purple-400' : ($user['tipe_pekerjaan'] == 'kepala toko' ? 'bg-green-500' : 'bg-yellow-400') }}">{{ $user['tipe_pekerjaan'] }}</span>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xl font-bold border border-gray-200">
+                        {{ substr($user['nama_pengguna'], 0, 1) }}
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-gray-800">{{ $user['nama_pengguna'] }}</h5>
+                        <p class="text-xs text-gray-400 font-mono">{{ $user['username'] }}</p>
+                    </div>
+                </div>
+                
+                {{-- Badge Role --}}
+                @php
+                    $roleColor = match($user['tipe_pekerjaan']) {
+                        'Pemilik' => 'bg-purple-100 text-purple-700 border-purple-200',
+                        'Kepala Toko' => 'bg-blue-100 text-blue-700 border-blue-200',
+                        default => 'bg-orange-100 text-orange-700 border-orange-200',
+                    };
+                @endphp
+                <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md border {{ $roleColor }}">
+                    {{ $user['tipe_pekerjaan'] }}
+                </span>
+            </div>
+
+            <div class="space-y-2 text-sm text-gray-600 mb-6">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-phone text-gray-400 w-4"></i>
+                    <span>{{ $user['kontak_pengguna'] }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-regular fa-calendar text-gray-400 w-4"></i>
+                    <span>Terdaftar: {{ \Carbon\Carbon::parse($user['tanggal_daftar'])->format('d M Y') }}</span>
                 </div>
             </div>
-            <p class="text-gray-500 text-sm mt-2">Telepon: {{ $user['kontak_pengguna'] }}</p>
-            <p class="text-gray-500 text-sm">Terdaftar: {{ \Carbon\Carbon::parse($user['tanggal_daftar'])->format('d-m-Y') }}</p>
             
-            <div class="mt-4 flex gap-2">
+            <div class="flex gap-2 pt-4 border-t border-gray-100">
                 <button 
                     type="button"
-                    @click="showAddModal2 = true"
-                    class="
-                        flex-1
-                        bg-black text-white px-4 py-2 rounded-md text-sm text-center
-                        hover:bg-gray-800 transition-colors duration-200
-                    "
+                    {{-- 1. Set data selectedPengguna saat tombol Edit diklik --}}
+                    @click='selectedPengguna = @json($user); showEditModal = true'
+                    class="flex-1 bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
                 >
                     Edit
                 </button>
 
+                {{-- 2. Form Delete dengan Route yang benar --}}
                 <form 
-                    action="" 
+                    action="{{ route('pengguna.hapus', $user->id_pengguna) }}" 
                     method="POST" 
                     class="flex-1"
-                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?');"
+                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus akses pengguna ini?');"
                 >
                     @csrf
                     @method('DELETE')
-                    
                     <button 
                         type="submit" 
-                        class="
-                            w-full
-                            bg-red-600 text-white px-4 py-2 rounded-md text-sm text-center
-                            hover:bg-red-700 transition-colors duration-200
-                        "
+                        class="w-full bg-red-50 text-red-600 border border-red-100 px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
                     >
-                        Nonaktifkan
+                        Hapus
                     </button>
                 </form>
             </div>
@@ -79,104 +104,76 @@
         @endforeach
     </div>
 
-    <!-- Daftar Pengguna -->
+    {{-- ================= MODAL TAMBAH (MULTI-STEP) ================= --}}
     <div 
-        x-show="showAddModal1" 
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+        x-show="showAddModal" 
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
         style="display: none;"
     >    
         <div 
-            @click.outside="showAddModal1 = false; step = 1; nama = ''; role = ''; telepon = ''"
-            x-data="{ step: 1, nama: '', role: '', telepon: '' }"
-
-            x-show="showAddModal1"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform scale-90"
-            x-transition:enter-end="opacity-100 transform scale-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform scale-100"
-            x-transition:leave-end="opacity-0 transform scale-90"
-            class="bg-white rounded-lg shadow-xl w-full max-w-md"
+            @click.outside="showAddModal = false"
+            x-data="{ step: 1 }"
+            class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
         >
-            <div class="flex justify-between items-center p-4 border-b">
-                <h4 class="font-semibold text-gray-700">Tambah Pengguna Baru</h4>
-                <button @click="showAddModal1 = false; step = 1; nama = ''; role = ''; telepon = ''" class="text-gray-400 hover:text-gray-600">
+            <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+                <h4 class="font-bold text-gray-700">Tambah Staff Baru</h4>
+                <button @click="showAddModal = false" class="text-gray-400 hover:text-gray-600">
                     <i class="fa-solid fa-xmark fa-lg"></i>
                 </button>
             </div>
 
-            <form action="{{ route('pengguna.tambah-pengguna') }}" method="POST"> 
+            <form action="{{ route('pengguna.tambah') }}" method="POST"> 
                 @csrf
                 
-                <div x-show="step === 1" class="p-5 space-y-4">
-                    <!-- Nama -->
+                {{-- Step 1: Data Diri --}}
+                <div x-show="step === 1" class="p-6 space-y-4">
                     <div>
-                        <label for="nama_pengguna" class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-                        <input type="text" id="nama_pengguna" name="nama" x-model="nama" class="w-full border rounded-md p-2 text-sm" placeholder="Masukkan nama lengkap" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                        <input type="text" name="nama" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" placeholder="Contoh: Budi Santoso" required>
                     </div>
-                    
-                    <!-- Jenis Pekerjaan -->
                     <div>
-                        <label for="jenis_pekerjaan" class="block text-sm font-medium text-gray-700 mb-1">Jenis Pekerjaan</label>
-                        <select id="jenis_pekerjaan" name="pekerjaan" x-model="role" class="w-full border rounded-md p-2 text-sm bg-white" required>
-                            <option value="" disabled selected>Pilih jenis pekerjaan</option>
-                            <option value="pemilik">Pemilik</option>
-                            <option value="kepala toko">Kepala Toko</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Posisi / Jabatan</label>
+                        <select name="pekerjaan" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" required>
                             <option value="kasir">Kasir</option>
+                            <option value="kepala toko">Kepala Toko</option>
+                            <option value="pemilik">Pemilik</option>
                         </select>
                     </div>
-                    
-                    <!-- Telepon -->
                     <div>
-                        <label for="telepon" class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
-                        <input type="tel" id="telepon" name="telepon" x-model="telepon" class="w-full border rounded-md p-2 text-sm" placeholder="Contoh: 08123456789" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp</label>
+                        <input type="tel" name="telepon" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" placeholder="08..." required>
                     </div>
                 </div>
 
-                <div x-show="step === 2" class="p-5 space-y-4">
-                    <!-- Username -->
-                    <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                        <input type="text" id="username" name="username" class="w-full border rounded-md p-2 text-sm" placeholder="Username untuk login" required>
+                {{-- Step 2: Akun Login --}}
+                <div x-show="step === 2" class="p-6 space-y-4">
+                    <div class="bg-blue-50 p-3 rounded-lg text-xs text-blue-700 border border-blue-200 mb-2">
+                        <i class="fa-solid fa-info-circle mr-1"></i> Buat kredensial untuk login sistem.
                     </div>
-                    
-                    <!-- Password -->
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input type="password" id="password" name="password" class="w-full border rounded-md p-2 text-sm" placeholder="Minimal 8 karakter" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" name="username" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" placeholder="username_login" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" name="password" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" placeholder="Min. 6 karakter" required>
                     </div>
                 </div>
                 
-                <div x-show="step === 1" class="p-4 border-t text-right bg-gray-50 rounded-b-lg">
-                    <button type="button" @click="showAddModal1 = false; step = 1; nama = ''; role = ''; telepon = ''" class="border px-4 py-2 rounded-md text-sm mr-2 hover:bg-gray-100">
-                        Batal
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="step = 2" 
-                        :disabled="nama === '' || role === '' || telepon === ''"
-                        :class="{ 'opacity-50 cursor-not-allowed': nama === '' || role === '' || telepon === '' }"
-                        class="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-opacity"
-                    >
-                        Selanjutnya
+                {{-- Footer Tombol Step 1 --}}
+                <div x-show="step === 1" class="p-4 border-t bg-gray-50 flex justify-end gap-2">
+                    <button type="button" @click="showAddModal = false" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 rounded-lg transition">Batal</button>
+                    <button type="button" @click="step = 2" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition">
+                        Lanjut <i class="fa-solid fa-arrow-right ml-1"></i>
                     </button>
                 </div>
 
-                <div x-show="step === 2" class="p-4 border-t text-right bg-gray-50 rounded-b-lg flex justify-between">
-                    <button type="button" @click="step = 1" class="border px-4 py-2 rounded-md text-sm hover:bg-gray-100">
-                        Kembali
-                    </button>
-                    <div>
-                        <button type="button" @click="showAddModal1 = false; step = 1; nama = ''; role = ''; telepon = ''" class="border px-4 py-2 rounded-md text-sm mr-2 hover:bg-gray-100">
-                            Batal
-                        </button>
-                        <button type="submit" class="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
+                {{-- Footer Tombol Step 2 --}}
+                <div x-show="step === 2" class="p-4 border-t bg-gray-50 flex justify-between">
+                    <button type="button" @click="step = 1" class="text-sm text-gray-500 hover:text-gray-800 underline">Kembali</button>
+                    <div class="flex gap-2">
+                        <button type="button" @click="showAddModal = false" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 rounded-lg transition">Batal</button>
+                        <button type="submit" class="px-4 py-2 text-sm text-white bg-green-600 hover:bg-green-700 rounded-lg font-medium transition">
                             Simpan Pengguna
                         </button>
                     </div>
@@ -185,76 +182,76 @@
         </div>
     </div>
 
-    <!-- Update Pengguna -->
+    {{-- ================= MODAL EDIT PENGGUNA ================= --}}
     <div 
-        x-show="showAddModal2" 
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+        x-show="showEditModal" 
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
         style="display: none;"
     >    
         <div 
-            @click.outside="showAddModal2 = false; step = 1; nama = ''; role = ''; telepon = ''"
-            x-data="{ step: 1, nama: '', role: '', telepon: '' }"
+            @click.outside="showEditModal = false"
+            class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
         >
-            <div class="flex justify-between items-center p-4 border-b">
-                <h4 class="font-semibold text-gray-700">Update Pengguna</h4>
-                <button @click="showAddModal2 = false; step = 1; nama = ''; role = ''; telepon = ''" class="text-gray-400 hover:text-gray-600">
+            <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+                <h4 class="font-bold text-gray-700">Edit Data Pengguna</h4>
+                <button @click="showEditModal = false" class="text-gray-400 hover:text-gray-600">
                     <i class="fa-solid fa-xmark fa-lg"></i>
                 </button>
             </div>
 
-            <form action="{{ route('pengguna.update', ['pengguna' => $user->id_pengguna]) }}" method="POST"> 
+            {{-- 
+                PERBAIKAN UTAMA:
+                1. Action form dinamis menggunakan :action (concat string JS).
+                2. Menggunakan x-model yang terikat ke selectedPengguna untuk mengisi value otomatis.
+            --}}
+            <form :action="'/pengguna/update/' + (selectedPengguna ? selectedPengguna.id_pengguna : '')" method="POST"> 
                 @csrf
                 @method('PUT')
                 
-                <div x-show="step === 1" class="p-5 space-y-4">
+                <div class="p-6 space-y-4" x-data>
                     <!-- Nama -->
                     <div>
-                        <label for="nama_pengguna" class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-                        <input type="text" id="nama_pengguna" name="nama" x-model="nama" class="w-full border rounded-md p-2 text-sm" placeholder="Masukkan nama lengkap" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                        {{-- Gunakan :value untuk mengisi data awal dari selectedPengguna --}}
+                        <input type="text" name="nama" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" 
+                            x-model="selectedPengguna && selectedPengguna.nama_pengguna" required>
                     </div>
                     
                     <!-- Jenis Pekerjaan -->
                     <div>
-                        <label for="jenis_pekerjaan" class="block text-sm font-medium text-gray-700 mb-1">Jenis Pekerjaan</label>
-                        <select id="jenis_pekerjaan" name="pekerjaan" x-model="role" class="w-full border rounded-md p-2 text-sm bg-white" required>
-                            <option value="" disabled selected>Pilih jenis pekerjaan</option>
-                            <option value="pemilik">Pemilik</option>
-                            <option value="kepala toko">Kepala Toko</option>
-                            <option value="kasir">Kasir</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Posisi / Jabatan</label>
+                        <select name="pekerjaan" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" 
+                            x-model="selectedPengguna && selectedPengguna.tipe_pekerjaan" required>
+                            <option value="Pemilik">Pemilik</option>
+                            <option value="Kepala Toko">Kepala Toko</option>
+                            <option value="Kasir">Kasir</option>
                         </select>
                     </div>
                     
                     <!-- Telepon -->
                     <div>
-                        <label for="telepon" class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
-                        <input type="tel" id="telepon" name="telepon" x-model="telepon" class="w-full border rounded-md p-2 text-sm" placeholder="Contoh: 08123456789" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
+                        <input type="tel" name="telepon" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" 
+                            x-model="selectedPengguna && selectedPengguna.kontak_pengguna" required>
+                    </div>
+                    
+                    <!-- Note Password -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs text-yellow-800">
+                        <i class="fa-solid fa-lock mr-1"></i> Password tidak dapat diubah dari menu ini. Minta pengguna untuk mereset password jika lupa.
                     </div>
                 </div>
 
-
-                <div x-show="step === 1" class="p-4 border-t text-right bg-gray-50 rounded-b-lg flex justify-between">
-                    <button type="button" @click="step = 1" class="border px-4 py-2 rounded-md text-sm hover:bg-gray-100">
-                        Kembali
+                <div class="p-4 border-t bg-gray-50 flex justify-end gap-2">
+                    <button type="button" @click="showEditModal = false" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 rounded-lg transition">
+                        Batal
                     </button>
-                    <div>
-                        <button type="button" @click="showAddModal2 = false; step = 1; nama = ''; role = ''; telepon = ''" class="border px-4 py-2 rounded-md text-sm mr-2 hover:bg-gray-100">
-                            Batal
-                        </button>
-                        <button type="submit" class="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
-                            Simpan Pengguna
-                        </button>
-                    </div>
+                    <button type="submit" class="px-4 py-2 text-sm text-white bg-black hover:bg-gray-800 rounded-lg font-medium transition">
+                        Simpan Perubahan
+                    </button>
                 </div>
             </form>
         </div>
     </div>
+
 </main>
-
 @endsection
-

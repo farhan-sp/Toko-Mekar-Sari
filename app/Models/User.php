@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\PenggunaModel;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -14,18 +17,11 @@ class User extends Authenticatable
     protected $table = 'login_pengguna';
     protected $primaryKey = "id_login";
 
-
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'id_login',
-        'id_pengguna',
-        'username',
-        'password'
-    ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -46,5 +42,9 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
         ];
+    }
+
+    public function pengguna(): HasOne {
+        return $this->hasOne(PenggunaModel::class, 'id_login', 'id_login');
     }
 }

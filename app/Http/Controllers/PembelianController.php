@@ -13,7 +13,8 @@ use App\Models\ {
     TransaksiPembelianModel,
     TransaksiPenjualanModel,
     DetailTransaksiPembelianModel,
-    SupplierModel
+    SupplierModel,
+    PenggunaModel
 };
 
 use Exception;
@@ -25,24 +26,18 @@ class PembelianController extends Controller
         $barang = BarangModel::all();
         $supplier = SupplierModel::all();
         
-        $perlu_restok = [];
-        foreach($barang as $id) {
-            if($id['jumlah_stok_barang'] <= $id['stok_minimal']) {
-                $perlu_restok[] = $id;
-            }
-        }
-        
-        return view('halaman.pembelian', ['kategori' => $kategori, 'barang' => $barang, 'barang_restok' => $perlu_restok, 'supplier' => $supplier]); 
+        return view('halaman.pembelian', ['kategori' => $kategori, 'barang' => $barang, 'supplier' => $supplier]); 
     }
+
     // Pembelian
     public function daftarTransaksiPembelian() {
-        $data = TransaksiPembelianModel::with('supplier', 'pengguna')->get();
-        return view('halaman.daftar-transaksi-pembelian', ['daftar_pembelian' => $data]);
-    }
-    public function detailTransaksiPembelian(Request $request) {
-        $data = DetailTransaksiPembelianModel::find($request->id_pembelian);
-        
-        return view('halaman.daftar-transaksi-Pembelian');
+        $daftar_pembelian = TransaksiPembelianModel::with([
+            'supplier', 
+            'pengguna', 
+            'detailPembelian.barang'
+        ])->orderBy('tanggal_transaksi_pembelian', 'desc')->get();
+
+        return view('halaman.daftar-transaksi-pembelian', ['daftar_pembelian' => $daftar_pembelian]);
     }
     public function storeTransaction(Request $request)
     {
@@ -52,29 +47,39 @@ class PembelianController extends Controller
         try {
             $total_harga = $request->jumlah * $barang->harga_jual;
             
-            $urutan_transaksi = TransaksiPembelianModel::count() + 1;
-            $format_urutan = sprintf("%03d", $urutan_transaksi);
-            $id_transaksi = "TRB-" . $format_urutan;
-
-            $pengguna_pembuat = Auth::user()->getAttribute('id_pengguna');
-            $pembelian = TransaksiPembelianModel::create([
-                'id_transaksi_pembelian' =>  $id_transaksi,
-                'id_pengguna_pembuat' => $pengguna_pembuat,
+            $id_temp = "TEMP-" . uniqid();
+            
+            $user = Auth::user();
+            $transaksi_pembelian = TransaksiPembelianModel::create([
+                'kode_transaksi_pembelian' => $id_temp,
+                'id_pengguna_pembuat' => $user->pengguna()->get()->first()->id_pengguna,
                 'id_supplier'  => $barang->id_supplier,
                 'total_harga'   => $total_harga,
                 'tanggal_transaksi_pembelian' => now(),
             ]);
+
+            $kode = $transaksi_pembelian->id_transaksi_pembelian;
+            $kode_transaksi_pembelian = 'PEM-' . sprintf('%10d', $kode);
+
+            $transaksi_pembelian->update([
+                'kode_transaksi_pembelian' => $kode_transaksi_pembelian
+            ]);
             
-            $urutan_detail_transaksi = DetailTransaksiPembelianModel::count() + 1;
-            $format_urutan = sprintf("%03d", $urutan_detail_transaksi);
-            $id_detail_transaksi = "DTRB-" . $format_urutan;
-            $cek = DetailTransaksiPembelianModel::create([
-                'id_detail_transaksi_pembelian' => $id_detail_transaksi,
-                'id_transaksi_pembelian' => $pembelian->id_transaksi_pembelian, 
+            $id_temp = "TEMP-" . uniqid();
+            $detail_transaksi_pembelian = DetailTransaksiPembelianModel::create([
+                'kode_detail_transaksi_pembelian' => $id_temp,
+                'id_transaksi_pembelian' => $transaksi_pembelian->id_transaksi_pembelian, 
                 'id_barang' => $request->id_barang,
-                'jumlah_barang' => $barang['jumlah_stok_barang'],
-                'harga_perbarang' => $barang['harga_jual'],
+                'jumlah_barang' => $request->jumlah,
+                'harga_perbarang' => $barang['harga_beli'],
                 'subtotal' => $total_harga,
+            ]);
+
+            $kode = $detail_transaksi_pembelian->id_detail_transaksi_pembelian;
+            $kode_detail_transaksi_pembelian = 'DPEM-' . sprintf('%10d', $kode);
+
+            $detail_transaksi_pembelian->update([
+                'kode_detail_transaksi_pembelian' => $kode_detail_transaksi_pembelian
             ]);
 
             DB::commit();

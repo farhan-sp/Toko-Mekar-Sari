@@ -17,9 +17,8 @@ class TransaksiPembelianModel extends Model
     protected $table = "transaksi_pembelian";
     protected $primaryKey = "id_transaksi_pembelian";
     public $timestamps = false;
-    public $incrementing  = false;
-    protected $keyType = 'string';
     protected $fillable = [
+        'kode_transaksi_pembelian',
         'id_transaksi_pembelian',
         'id_pengguna_pembuat',
         'id_supplier',
