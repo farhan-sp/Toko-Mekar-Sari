@@ -41,27 +41,17 @@ class PenggunaController extends Controller
         DB::beginTransaction();
 
         try {
-            $urutan_pengguna = PenggunaModel::count() + 1;
-            $format_urutan = sprintf("%03d", $urutan_pengguna);
-            $id_pengguna = "PGN-" . $format_urutan;
+            $login = LoginModel::create([
+                'username' => $request->username,
+                'password' => Hash::make($request->password),
+            ]);
 
             $pengguna = PenggunaModel::create([
-                'id_pengguna' => $id_pengguna,
+                'id_login' => $login->id_login,
                 'nama_pengguna' => $request->nama,
                 'tipe_pekerjaan' => $request->pekerjaan,
                 'kontak_pengguna' => $request->telepon,
-                'tanggal_daftar' => now(),
-            ]);
-
-            $urutan_login = LoginModel::count() + 1;
-            $format_urutan = sprintf("%03d", $urutan_login);
-            $id_login = "LGN-" . $format_urutan;
-
-            $login = LoginModel::create([
-                'id_login' => $id_login,
-                'id_pengguna' => $pengguna->id_pengguna,
-                'username' => $request->username,
-                'password' => Hash::make($request->password),
+                'tanggal_terdaftar' => now(),
             ]);
 
             DB::commit();
@@ -79,16 +69,28 @@ class PenggunaController extends Controller
         
         return redirect('/login');
     }
-    public function statusUpdate(Request $request, PenggunaModel $pengguna)
+    public function statusUpdate($id_pengguna)
     {
         try {
-            $pengguna->nama_pengguna = $request['status'];
+            $pengguna = PenggunaModel::findOrFail($id_pengguna);
+            $hasHistory = $pengguna->penjualan()->exists() || $pengguna->pembelian()->exists();
 
-            $pengguna->save();
+            if ($hasHistory) {
+                $pengguna->delete(); 
 
-            return back()->with('success', 'Status Pengguna diperbarui!');
+                return redirect()->back()->with('success', 'Pengguna diarsipkan karena memiliki riwayat transaksi.');
+            
+            } else {
+                if ($pengguna->gambar_Pengguna && \Storage::disk('public')->exists($pengguna->gambar_Pengguna)) {
+                    \Storage::disk('public')->delete($pengguna->gambar_Pengguna);
+                }
+
+                $pengguna->forceDelete();
+
+                return redirect()->back()->with('success', 'Pengguna berhasil dihapus permanen.');
+            }            
         } catch (Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat memperbarui: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menghapus Pengguna: ' . $e->getMessage());
         }
     }
     public function update(Request $request, PenggunaModel $pengguna)

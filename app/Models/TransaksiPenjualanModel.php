@@ -16,9 +16,8 @@ class TransaksiPenjualanModel extends Model
     protected $table = "transaksi_penjualan";
     protected $primaryKey = "id_transaksi_penjualan";
     public $timestamps = false;
-    public $incrementing  = false;
-    protected $keyType = 'string';
     protected $fillable = [
+        'kode_transaksi_penjualan',
         'id_transaksi_penjualan',
         'id_pengguna_pembuat',
         'id_pelanggan',

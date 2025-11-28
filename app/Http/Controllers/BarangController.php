@@ -17,15 +17,13 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 class BarangController
 {
     public function index() {
-        $data_barang = BarangModel::with('kategori')
-                        ->orderBy('nama_barang', 'asc')
-                        ->get();
+        $data_barang = KategoriModel::with(['barang' => function($query) {
+                $query->orderBy('nama_barang', 'asc');
+            }])
+            ->orderBy('nama_kategori', 'asc')
+            ->get();
 
-        $pengurutan_data = $data_barang->groupBy(function($item) {
-            return optional($item->kategori)->nama_kategori ?? 'Tanpa Kategori';
-        });
-
-        $data = $pengurutan_data->sortKeys();
+        $data = $data_barang->sortKeys();
 
         $kategori = KategoriModel::all();
         $supplier = SupplierModel::all();
@@ -36,20 +34,36 @@ class BarangController
         DB::beginTransaction();
 
         try {
-            $urutan_barang = BarangModel::count() + 1;
-            $format_urutan = sprintf("%03d", $urutan_barang);
-            $id_barang = "BRG-" . $format_urutan;
-
-            $data = BarangModel::create([
-                'id_barang' => $id_barang,
+            $id_temp = "TMP-" . uniqid();
+            $barang = BarangModel::create([
+                'kode_barang' => $id_temp,
                 'id_kategori' => $request->kategori,
                 'nama_barang' => $request->nama_barang,
+                'gambar_barang' => $request->gambar,
                 'harga_jual' => $request->harga_jual,
                 'harga_beli' => $request->harga_beli,
                 'jumlah_stok_barang' => $request->stok,
                 'stok_minimal' => $request->min_stok,
                 'satuan' => $request->satuan,
                 'id_supplier' => $request->supplier
+            ]);
+
+            if ($request->hasFile('gambar')) {
+                if ($barang->gambar_barang && \Storage::disk('public')->exists($barang->gambar_barang)) {
+                    \Storage::disk('public')->delete($barang->gambar_barang);
+                }
+
+                $path = $request->file('gambar')->store('produk', 'public');
+                $barang->update([
+                    'gambar_barang' => $path
+                ]);
+            }
+
+            $kode = $barang->id_barang;
+            $kode_barang = 'BAR-' . sprintf('%10d', $kode);
+
+            $barang->update([
+                'kode_barang' => $kode_barang
             ]);
 
             DB::commit();
@@ -64,17 +78,40 @@ class BarangController
         DB::beginTransaction();
 
         try {
-            $urutan_kategori = KategoriModel::count() + 1;
-            $format_urutan = sprintf("%03d", $urutan_kategori);
-            $id_kategori = "BRG-" . $format_urutan;
-
-            $data = KategoriModel::create([
-                'id_kategori' => $id_kategori,
+            $id_temp = "TEMP-" . uniqid();
+            $kategori = KategoriModel::create([
+                'kode_kategori' => $id_temp,
                 'nama_kategori' => $request->nama_kategori,
             ]);
 
+            $kode = $kategori->id_kategori;
+            $kode_kategori = 'KAT-' . sprintf('%10d', $kode);
+
+            $kategori->update([
+                'kode_kategori' => $kode_kategori
+            ]);
+
             DB::commit();
-            return redirect()->route('pembelian.index')->with('success', 'Kategori berhasil disimpan!');
+            return redirect()->route('barang.index')->with('success', 'Kategori berhasil disimpan!');
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return back()->with('error', 'Error : ' . $e->getMessage());
+        }
+    }
+    public function tambahSupplier(Request $request) {
+        DB::beginTransaction();
+
+        try {
+            $id_temp = "TEMP-" . uniqid();
+            $supplier = SupplierModel::create([
+                'nama_supplier' => $request->nama,
+                'kontak_supplier' => $request->kontak,
+                'tanggal_terdaftar' => now(),
+            ]);
+            
+            DB::commit();
+            return redirect()->route('barang.index')->with('success', 'supplier berhasil disimpan!');
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -97,6 +134,17 @@ class BarangController
                 'satuan' => $request['satuan'],
             ]);
 
+            if ($request->hasFile('gambar')) {
+                if ($barang->gambar_barang && \Storage::disk('public')->exists($barang->gambar_barang)) {
+                    \Storage::disk('public')->delete($barang->gambar_barang);
+                }
+
+                $path = $request->file('gambar')->store('produk', 'public');
+                $barang->update([
+                    'gambar_barang' => $path
+                ]);
+            }
+
             return back()->with('success', 'Data barang berhasil diperbarui.');
 
         } catch (Exception $e) {
@@ -108,10 +156,22 @@ class BarangController
     {
         try {
             $barang = BarangModel::findOrFail($id_barang);
-            $barang->delete();
+            $hasHistory = $barang->penjualan()->exists() || $barang->pembelian()->exists();
 
-            return back()->with('success', 'Barang berhasil dihapus.');
+            if ($hasHistory) {
+                $barang->delete(); 
+
+                return redirect()->back()->with('success', 'Barang diarsipkan karena memiliki riwayat transaksi.');
             
+            } else {
+                if ($barang->gambar_barang && \Storage::disk('public')->exists($barang->gambar_barang)) {
+                    \Storage::disk('public')->delete($barang->gambar_barang);
+                }
+
+                $barang->forceDelete();
+
+                return redirect()->back()->with('success', 'Barang berhasil dihapus permanen.');
+            }            
         } catch (Exception $e) {
             return back()->with('error', 'Gagal menghapus barang: ' . $e->getMessage());
         }
