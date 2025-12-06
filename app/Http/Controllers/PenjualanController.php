@@ -149,4 +149,12 @@ class PenjualanController extends Controller
             return back()->with('error', 'Error : ' . $e->getMessage());
         }
     }
+
+    public function cetakStruk($id) {
+        // Ambil data transaksi beserta relasinya
+        $transaksi = TransaksiPenjualanModel::with(['pelanggan', 'pengguna', 'detailPenjualan.barang'])
+            ->findOrFail($id);
+
+        return view('halaman.cetak-struk', ['transaksi' => $transaksi]);
+    }
 }

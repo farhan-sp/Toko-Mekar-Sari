@@ -18,7 +18,8 @@ use App\Models\ {
 class PenggunaController extends Controller
 {
     public function index() {
-        $data = PenggunaModel::get();
+        $id_saya = Auth::user()->id_login; 
+        $data = PenggunaModel::where('id_login', '!=', $id_saya)->get();
 
         return view('halaman.pengguna', ['pengguna' => $data]);
     }
@@ -30,6 +31,14 @@ class PenggunaController extends Controller
 
         if(Auth::attempt($kredensial)) {
             $request->session()->regenerate();
+            $user = Auth::user()->pengguna()->get()->first();
+
+            $role = strtolower($user->tipe_pekerjaan ?? '');
+
+            if ($role === 'kasir') {
+                return redirect()->route('penjualan.index');
+            }
+
             return redirect()->intended('/dashboard');
         }
 
