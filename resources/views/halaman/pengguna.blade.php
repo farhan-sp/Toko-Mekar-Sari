@@ -131,13 +131,33 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
                         <input type="text" name="nama" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" placeholder="Contoh: Budi Santoso" required>
                     </div>
-                    <div>
+                    @php
+                        // Pastikan relasi data_diri sudah ada (seperti langkah sebelumnya)
+                        $role_login = strtolower(Auth::user()->pengguna()->get()->first()->tipe_pekerjaan ?? '');
+                    @endphp
+
+                    <div class="mb-1">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Posisi / Jabatan</label>
+                        
                         <select name="pekerjaan" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" required>
-                            <option value="kasir">Kasir</option>
-                            <option value="kepala toko">Kepala Toko</option>
-                            <option value="pemilik">Pemilik</option>
+                            
+                            {{-- Opsi KASIR: Bisa dilihat oleh Pemilik maupun Kepala Toko --}}
+                            <option value="Kasir">Kasir</option>
+
+                            {{-- Opsi TINGKAT TINGGI: Hanya bisa dilihat oleh PEMILIK --}}
+                            @if($role_login === 'pemilik')
+                                <option value="Kepala Toko">Kepala Toko</option>
+                                <option value="Pemilik">Pemilik</option>
+                            @endif
+
                         </select>
+                        
+                        {{-- Feedback Visual (Opsional) --}}
+                        @if($role_login === 'kepala toko')
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fa-solid fa-info-circle"></i> Kepala toko hanya dapat menambahkan Kasir.
+                            </p>
+                        @endif
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp</label>

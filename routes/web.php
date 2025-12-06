@@ -18,12 +18,6 @@ Route::get('/login', [PenggunaController::class, 'login'])->name('login');
 Route::post('/login/autentikasi', [PenggunaController::class, 'autentikasi'])->name('autentikasi');
 Route::post('/logout', [PenggunaController::class, 'logout'])->name('logout');
 
-Route::get('/maintenance', function() {
-    return view('halaman.maintenance');
-})->name('maintenance');
-Route::get('/test', [Test::class, 'index'])->name('test');
-Route::post('/test/percobaan', [Test::class, 'terima'])->name('test.coba-1');
-
 Route::middleware(['auth', 'hapus-sesi'])->group(function() {
     // Pemilik Toko
     Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna');
@@ -54,6 +48,7 @@ Route::middleware(['auth', 'hapus-sesi'])->group(function() {
     Route::post('/penjualan/cart/add', [PenjualanController::class, 'addToCart'])->name('penjualan.cart.add');
     Route::post('/penjualan/cart/clear', [PenjualanController::class, 'clearCart'])->name('penjualan.cart.clear');
     Route::post('/penjualan/store', [PenjualanController::class, 'storeTransaction'])->name('penjualan.store');
+    Route::get('/penjualan/cetak-struk/{id}', [PenjualanController::class, 'cetakStruk'])->name('penjualan.cetak_struk');
 
     Route::get('/daftar/penjualan', [PenjualanController::class, 'daftarTransaksiPenjualan'])->name('daftar.penjualan');
     Route::post('/daftar/penjualan/detail', [PenjualanController::class, 'detailTransaksiPenjualan'])->name('detail.penjualan');

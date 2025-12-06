@@ -217,10 +217,21 @@
             </div>
 
             <div class="p-5 border-t bg-gray-50 flex justify-between items-center">
-                <span class="text-gray-500 font-medium">Total Penerimaan</span>
-                <span class="text-xl font-bold text-green-600">
-                    Rp <span x-text="new Intl.NumberFormat('id-ID').format(selectedTransaksi?.total_harga || 0)"></span>
-                </span>
+                <div>
+                    <span class="text-gray-500 font-medium text-sm block">Total Tagihan</span>
+                    <span class="text-xl font-bold text-green-600">
+                        Rp <span x-text="new Intl.NumberFormat('id-ID').format(selectedTransaksi?.total_harga || 0)"></span>
+                    </span>
+                </div>
+
+                {{-- TOMBOL CETAK STRUK --}}
+                <a 
+                    :href="'/penjualan/cetak-struk/' + (selectedTransaksi ? selectedTransaksi.id_transaksi_penjualan : '')" 
+                    target="_blank"
+                    class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center gap-2 shadow-sm"
+                >
+                    <i class="fa-solid fa-print"></i> Cetak Struk
+                </a>
             </div>
         </div>
     </div>

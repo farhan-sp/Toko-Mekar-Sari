@@ -260,12 +260,6 @@
                         <span class="text-xs">No Image</span>
                     </div>
                 @endif
-                
-                <div class="absolute top-2 right-2">
-                    <span class="text-[10px] font-bold px-2 py-1 rounded-full shadow-sm {{ $item['jumlah_stok_barang'] > 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white' }}">
-                        Stok: {{ $item['jumlah_stok_barang'] }}
-                    </span>
-                </div>
 
                 {{-- Badge Stok --}}
                 <div class="absolute top-2 right-2">
