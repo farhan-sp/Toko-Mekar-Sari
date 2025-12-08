@@ -19,10 +19,20 @@ use Exception;
 
 class PenjualanController extends Controller
 {
-    public function index() {
-        $barang = BarangModel::all();
-        
-        return view('halaman.penjualan', ['barang' => $barang]); 
+    public function index(Request $request) {
+        $keyword = $request->input('search');
+    
+        $barang = BarangModel::query()
+            ->when($keyword, function($q) use ($keyword) {
+                return $q->where('nama_barang', 'like', "%{$keyword}%")
+                        ->orWhere('kode_barang', 'like', "%{$keyword}%"); // Opsional
+            })
+            ->orderBy('nama_barang', 'asc')
+            ->simplePaginate(12); // Menampilkan 12 item per halaman
+
+        return view('halaman.penjualan', [
+            'barang' => $barang
+        ]);
     }
     
     // Penjualan
@@ -132,13 +142,25 @@ class PenjualanController extends Controller
             DB::commit();
 
             session()->forget('cart');
-            return redirect()->route('penjualan.index')->with('success', 'Transaksi berhasil disimpan!');
+            return redirect()->route('penjualan.index')
+                ->with('success', 'Transaksi berhasil disimpan!')
+                ->with('last_transaction_id', $transaksi_penjualan->id_transaksi_penjualan);
 
         } catch (Exception $e) {
             DB::rollBack();
             
             return back()->with('error', 'Terjadi kesalahan saat menyimpan transaksi: ' . $e->getMessage());
         }
+    }
+    public function hapusItem($id) {
+        $cart = session()->get('cart');
+
+        if(isset($cart[$id])) {
+            unset($cart[$id]); // Hapus item dari array
+            session()->put('cart', $cart); // Simpan kembali ke session
+        }
+
+        return redirect()->back()->with('success', 'Item berhasil dihapus dari keranjang.');
     }
     public function hapusTransaksi(TransaksiPenjualanModel $penjualan) {
         try {
@@ -156,5 +178,12 @@ class PenjualanController extends Controller
             ->findOrFail($id);
 
         return view('halaman.cetak-struk', ['transaksi' => $transaksi]);
+    }
+
+    public function getDetail($id) {
+        $transaksi = TransaksiPenjualanModel::with(['pelanggan', 'detailPenjualan.barang'])
+            ->find($id);
+            
+        return response()->json($transaksi);
     }
 }

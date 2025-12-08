@@ -37,15 +37,15 @@ class BarangController
             $id_temp = "TMP-" . uniqid();
             $barang = BarangModel::create([
                 'kode_barang' => $id_temp,
-                'id_kategori' => $request->kategori,
+                'id_kategori' => $request->id_kategori,
                 'nama_barang' => $request->nama_barang,
                 'gambar_barang' => $request->gambar,
                 'harga_jual' => $request->harga_jual,
                 'harga_beli' => $request->harga_beli,
-                'jumlah_stok_barang' => $request->stok,
-                'stok_minimal' => $request->min_stok,
+                'jumlah_stok_barang' => $request->jumlah_stok_barang,
+                'stok_minimal' => $request->stok_minimal,
                 'satuan' => $request->satuan,
-                'id_supplier' => $request->supplier
+                'id_supplier' => $request->id_supplier
             ]);
 
             if ($request->hasFile('gambar')) {
@@ -129,7 +129,7 @@ class BarangController
                 'nama_barang' => $request['nama_barang'],
                 'harga_jual' => $request['harga_jual'],
                 'harga_beli' => $request['harga_beli'],
-                'jumlah_stok_barang' => $request['stok'],
+                'jumlah_stok_barang' => $request['jumlah_stok_barang'],
                 'stok_minimal' => $request['stok_minimal'],
                 'satuan' => $request['satuan'],
             ]);
