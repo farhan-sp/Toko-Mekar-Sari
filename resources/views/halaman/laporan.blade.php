@@ -3,10 +3,9 @@
 @section('judul-halaman', 'Laporan Statistik')
 @section('isi-content')
 <main class="flex-1 p-6 overflow-auto space-y-8">
-    
     <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">Ringkasan Performa</h2>
+            <h2 class="text-2xl font-bold text-gray-800">Ringkasan Keuangan</h2>
             <p class="text-sm text-gray-500">Analisis kinerja toko berdasarkan periode yang dipilih</p>
         </div>
         

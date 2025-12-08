@@ -251,7 +251,7 @@
                 <h4 class="font-bold text-gray-700">Tambah Barang Baru</h4>
                 <button @click="showAddBarangModal = false" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form action="{{ route('pembelian.store') }}" method="POST" enctype="multipart/form-data"> 
+            <form action="{{ route('pembelian.tambah-barang') }}" method="POST" enctype="multipart/form-data"> 
                 @csrf
                 <div class="p-6 grid grid-cols-2 gap-4">
                     <div class="col-span-2">
@@ -322,12 +322,12 @@
                 <div class="p-6 grid grid-cols-2 gap-4">
                     <div class="col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Foto Barang (Opsional)</label>
-                        <input type="file" name="gambar" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-lg">
+                        <input type="file" name="gambar" accept="image/*" :value="selectedBarang.nama_gambar" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-lg">
                     </div>
 
                     <div class="col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Barang</label>
-                        <input type="text" name="nama_barang" x-model="formData.nama" class="w-full border-gray-300 rounded-lg text-sm" required>
+                        <input type="text" name="nama_barang" x-model="formData.nama" class="w-full border-gray-300 rounded-lg text-sm" :value="selectedBarang.nama_barang" required>
                     </div>
 
                     <div>
@@ -348,11 +348,11 @@
                         </select>
                     </div>
 
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Harga Beli</label><input type="number" name="harga_beli" x-model="formData.harga_beli" class="w-full border-gray-300 rounded-lg text-sm" required></div>
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Harga Jual</label><input type="number" name="harga_jual" x-model="formData.harga_jual" class="w-full border-gray-300 rounded-lg text-sm" required></div>
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Stok</label><input type="number" name="stok" x-model="formData.stok" class="w-full border-gray-300 rounded-lg text-sm" required></div>
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Stok Min</label><input type="number" name="stok_minimal" x-model="formData.stok_minimal" class="w-full border-gray-300 rounded-lg text-sm" required></div>
-                    <div class="col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">Satuan</label><input type="text" name="satuan" x-model="formData.satuan" class="w-full border-gray-300 rounded-lg text-sm"></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Harga Beli</label><input type="number" name="harga_beli" :value="selectedBarang.harga_beli" x-model="formData.harga_beli" class="w-full border-gray-300 rounded-lg text-sm" required></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Harga Jual</label><input type="number" name="harga_jual" :value="selectedBarang.harga_jual" x-model="formData.harga_jual" class="w-full border-gray-300 rounded-lg text-sm" required></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Stok</label><input type="number" name="jumlah_stok_barang" :value="selectedBarang.jumlah_stok_barang" x-model="formData.stok" class="w-full border-gray-300 rounded-lg text-sm" required></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Stok Min</label><input type="number" name="stok_minimal" :value="selectedBarang.stok_minimal" x-model="formData.stok_minimal" class="w-full border-gray-300 rounded-lg text-sm" required></div>
+                    <div class="col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">Satuan</label><input type="text" name="satuan" :value="selectedBarang.satuan" x-model="formData.satuan" class="w-full border-gray-300 rounded-lg text-sm"></div>
                 </div>
                 <div class="p-4 border-t bg-gray-50 flex justify-end gap-2">
                     <button type="button" @click="showEditBarangModal = false" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 rounded-lg">Batal</button>

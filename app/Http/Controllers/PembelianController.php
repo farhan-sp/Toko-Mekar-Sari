@@ -21,12 +21,28 @@ use Exception;
 
 class PembelianController extends Controller
 {
-    public function index() {
+    public function index(Request $request) {
+        // Ambil keyword pencarian dari URL (?search=...)
+        $keyword = $request->input('search');
+
+        // Query dengan Filter & Pagination
+        $barang = BarangModel::with('kategori', 'supplier') // Eager load relasi biar cepat
+            ->when($keyword, function ($query) use ($keyword) {
+                // Jika ada keyword, filter berdasarkan nama
+                return $query->where('nama_barang', 'like', "%{$keyword}%");
+            })
+            ->orderBy('nama_barang', 'asc') // Urutkan nama A-Z
+            ->simplePaginate(12); // Tampilkan 12 barang per halaman
+
+        // Ambil data lain untuk dropdown
         $kategori = KategoriModel::all();
-        $barang = BarangModel::all();
         $supplier = SupplierModel::all();
-        
-        return view('halaman.pembelian', ['kategori' => $kategori, 'barang' => $barang, 'supplier' => $supplier]); 
+
+        return view('halaman.pembelian', [
+            'barang' => $barang,
+            'kategori' => $kategori,
+            'supplier' => $supplier,
+        ]);
     }
 
     // Pembelian

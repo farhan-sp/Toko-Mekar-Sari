@@ -49,6 +49,8 @@ Route::middleware(['auth', 'hapus-sesi'])->group(function() {
     Route::post('/penjualan/cart/clear', [PenjualanController::class, 'clearCart'])->name('penjualan.cart.clear');
     Route::post('/penjualan/store', [PenjualanController::class, 'storeTransaction'])->name('penjualan.store');
     Route::get('/penjualan/cetak-struk/{id}', [PenjualanController::class, 'cetakStruk'])->name('penjualan.cetak_struk');
+    Route::get('/penjualan/detail-json/{id}', [PenjualanController::class, 'getDetail']);
+    Route::post('/penjualan/cart/remove/{id}', [App\Http\Controllers\PenjualanController::class, 'hapusItem'])->name('penjualan.cart.remove');
 
     Route::get('/daftar/penjualan', [PenjualanController::class, 'daftarTransaksiPenjualan'])->name('daftar.penjualan');
     Route::post('/daftar/penjualan/detail', [PenjualanController::class, 'detailTransaksiPenjualan'])->name('detail.penjualan');
