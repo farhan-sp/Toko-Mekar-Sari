@@ -87,7 +87,7 @@
                     <div class="bg-white rounded-lg lg:rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden group">
                         <div class="aspect-square bg-white relative overflow-hidden flex items-center justify-center p-2"> 
                             @if($item['gambar_barang'])
-                                <img src="{{ asset('storage/' . $item['gambar_barang']) }}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" alt="{{ $item['nama_barang'] }}">
+                                <img src="storage/app/public/{{ $item['gambar_barang'] }}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" alt="{{ $item['nama_barang'] }}">
                             @else
                                 <div class="flex flex-col items-center justify-center text-gray-300">
                                     <i class="fa-regular fa-image text-3xl"></i>
