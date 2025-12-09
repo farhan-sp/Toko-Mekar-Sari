@@ -54,11 +54,11 @@ class PenggunaController extends Controller
             $cekUsername = LoginModel::where('username', $request->username)->exists();
 
             if ($cekNamaPengguna) {
-                return back()->with('error', 'Gagal! Nama Pengguna sudah digunakan.');
+                return redirect()->route('pengguna')->with('error', 'Gagal! Nama Pengguna sudah digunakan.');
             }
 
             if ($cekUsername) {
-                return back()->with('error', 'Gagal! Username sudah digunakan.');
+                return redirect()->route('pengguna')->with('error', 'Gagal! Username sudah digunakan.');
             }
 
             $login = LoginModel::create([

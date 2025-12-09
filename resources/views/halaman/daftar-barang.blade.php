@@ -124,7 +124,7 @@
                                         <div class="flex items-center">
                                             <div class="h-10 w-10 flex-shrink-0">
                                                 @if($barang->gambar_barang)
-                                                    <img class="h-10 w-10 rounded-lg object-cover border border-gray-200" src="{{ asset('storage/' . $barang->gambar_barang) }}" alt="">
+                                                    <img class="h-10 w-10 rounded-lg object-cover border border-gray-200" src="storage/app/public/{{ $barang->gambar_barang }} }}" alt="">
                                                 @else
                                                     <div class="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200">
                                                         <i class="fa-solid fa-image"></i>
