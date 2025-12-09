@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SupplierModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\ {
     KategoriModel,
     BarangModel,
+    SupplierModel,
 };
 
 use Exception;
@@ -174,6 +174,39 @@ class BarangController
             }            
         } catch (Exception $e) {
             return back()->with('error', 'Gagal menghapus barang: ' . $e->getMessage());
+        }
+    }
+    public function hapusSupplier($id) {
+        try {
+            $supplier = SupplierModel::findOrFail($id);
+            
+            if ($supplier->barang()->count() > 0) {
+                return back()->with('error', 'Gagal menghapus! Supplier ini masih terhubung dengan data barang.');
+            }
+
+            $supplier->delete();
+            
+            return back()->with('success', 'Supplier berhasil dihapus.');
+            
+        } catch (Exception $e) {
+            return back()->with('error', $e);
+        }
+    }
+
+    public function hapusKategori($id) {
+        try {
+            $kategori = KategoriModel::findOrFail($id);
+            
+            if ($kategori->barang()->count() > 0) {
+                return back()->with('error', 'Gagal menghapus! kategori ini masih terhubung dengan data barang.');
+            }
+
+            $kategori->delete();
+            
+            return back()->with('success', 'kategori berhasil dihapus.');
+            
+        } catch (Exception $e) {
+            return back()->with('error', $e);
         }
     }
 }

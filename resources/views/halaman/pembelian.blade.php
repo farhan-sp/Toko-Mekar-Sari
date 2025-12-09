@@ -42,7 +42,6 @@
                     @click="showAddForm = !showAddForm"
                     class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition shadow-sm flex items-center gap-2 whitespace-nowrap"
                 >
-                    <i class="fa-solid" :class="showAddForm ? 'fa-minus' : 'fa-plus'"></i>
                     <span class="hidden sm:inline" x-text="showAddForm ? 'Tutup' : 'Produk Baru'"></span>
                     <span class="sm:hidden">Baru</span>
                 </button>
@@ -129,10 +128,18 @@
         <div class="flex-1 overflow-y-auto p-1 custom-scrollbar">
             <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-3 lg:gap-4 pb-6">
                 @forelse($barang as $item)
-                <div class="bg-white rounded-lg lg:rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden group">
+                
+                {{-- LOGIKA: Cek apakah stok kritis --}}
+                @php
+                    $isCritical = $item['jumlah_stok_barang'] <= $item['stok_minimal'];
+                @endphp
+
+                {{-- CONTAINER: Jika Critical, ubah background merah muda dan border merah tebal --}}
+                <div class="{{ $isCritical ? 'bg-red-50 border-red-500 shadow-md shadow-red-100' : 'bg-white border-gray-200 shadow-sm' }} rounded-lg lg:rounded-xl border hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden group">
                     
                     {{-- Gambar (Square Aspect Ratio) --}}
-                    <div class="aspect-square bg-white relative overflow-hidden flex items-center justify-center p-2"> 
+                    {{-- Jika Critical, background container gambar disesuaikan sedikit agar menyatu --}}
+                    <div class="aspect-square {{ $isCritical ? 'bg-red-50/50' : 'bg-white' }} relative overflow-hidden flex items-center justify-center p-2"> 
                         @if($item['gambar_barang'])
                             <img src="{{ asset('storage/' . $item['gambar_barang']) }}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" alt="{{ $item['nama_barang'] }}">
                         @else
@@ -143,7 +150,8 @@
                         
                         {{-- Badge Stok --}}
                         <div class="absolute top-2 right-2">
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm {{ $item['jumlah_stok_barang'] > $item['stok_minimal'] ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                            {{-- Badge juga menyesuaikan, jika kritis background merah lebih gelap --}}
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm {{ $isCritical ? 'bg-red-600 text-white animate-pulse' : 'bg-green-100 text-green-700' }}">
                                 {{ $item['jumlah_stok_barang'] }}
                             </span>
                         </div>
@@ -152,11 +160,13 @@
                     {{-- Info Produk --}}
                     <div class="p-3 flex-1 flex flex-col">
                         <p class="text-[10px] text-gray-400 uppercase font-semibold mb-0.5 truncate">{{ $item->kategori->nama_kategori ?? '-' }}</p>
-                        <h5 class="font-bold text-gray-800 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5em]" title="{{ $item['nama_barang'] }}">
+                        
+                        {{-- Nama Barang: Jika kritis beri warna merah gelap agar terbaca --}}
+                        <h5 class="font-bold {{ $isCritical ? 'text-red-900' : 'text-gray-800' }} text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5em]" title="{{ $item['nama_barang'] }}">
                             {{ $item['nama_barang'] }}
                         </h5>
                         
-                        <div class="mt-auto flex items-center justify-between border-t border-gray-100 pt-2">
+                        <div class="mt-auto flex items-center justify-between border-t {{ $isCritical ? 'border-red-200' : 'border-gray-100' }} pt-2">
                             <div class="flex flex-col">
                                 <span class="text-[10px] text-gray-400">Harga Beli</span>
                                 <span class="font-bold text-gray-800 text-xs sm:text-sm">Rp {{ number_format($item['harga_beli'], 0, ',', '.') }}</span>
@@ -164,12 +174,15 @@
                         </div>
 
                         {{-- Form Restock --}}
-                        <form action="{{ route('pembelian.store') }}" method="POST" class="mt-2 flex gap-1">
+                        <form action="{{ route('pembelian.store') }}" method="POST" class="mt-2 flex gap-1" onsubmit="return confirm('Yakin ingin membeli {{ $item->nama_barang }} ?');"
+>
                             @csrf
                             <input type="hidden" name="id_barang" value="{{ $item['id_barang'] }}">
                             <input type="number" name="jumlah" value="1" min="1" class="w-12 px-1 py-1.5 text-center text-xs border border-gray-300 rounded focus:ring-blue-500" required>
-                            <button type="submit" class="flex-1 bg-blue-600 text-white text-xs font-medium rounded py-1.5 hover:bg-blue-700 transition-colors flex items-center justify-center gap-1 shadow-sm">
-                                <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Restock</span>
+                            
+                            {{-- Tombol Restock: Jika kritis, tombol mungkin bisa dibuat lebih mencolok (opsional), disini saya biarkan biru standar --}}
+                            <button type="submit" class="flex-1 {{ $isCritical ? 'bg-red-600 hover:bg-red-500' : 'bg-blue-600 hover:bg-blue-500' }} text-white text-xs font-medium rounded py-1.5 transition-colors flex items-center justify-center gap-1 shadow-sm">
+                                <span class="hidden sm:inline">Beli</span>
                             </button>
                         </form>
                     </div>

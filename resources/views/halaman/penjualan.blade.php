@@ -109,15 +109,15 @@
                             </h5>
                             
                             <div class="mt-auto flex items-center justify-between border-t border-gray-100 pt-2">
-                                <p class="font-bold text-blue-600 text-xs sm:text-sm">Rp {{ number_format($item['harga_jual'], 0, ',', '.') }}</p>
+                                <p class="font-bold text-green-600 text-xs sm:text-sm">Rp {{ number_format($item['harga_jual'], 0, ',', '.') }}</p>
                             </div>
 
                             <form action="{{ route('penjualan.cart.add') }}" method="POST" class="mt-2 flex gap-1">
                                 @csrf
                                 <input type="hidden" name="id_barang" value="{{ $item['id_barang'] }}">
                                 <input type="number" name="jumlah" value="1" min="1" max="{{ $item['jumlah_stok_barang'] }}" class="w-10 px-1 py-1 text-center text-xs border border-gray-300 rounded focus:ring-blue-500" {{ $item['jumlah_stok_barang'] == 0 ? 'disabled' : '' }}>
-                                <button type="submit" class="flex-1 bg-gray-900 text-white text-xs font-medium rounded py-1.5 hover:bg-gray-700 disabled:bg-gray-300 transition-colors" {{ $item['jumlah_stok_barang'] == 0 ? 'disabled' : '' }}>
-                                    <i class="fa-solid fa-plus sm:hidden"></i> <span class="hidden sm:inline">Tambah</span>
+                                <button type="submit" class="flex-1 bg-green-600 text-white text-xs font-medium rounded py-1.5 hover:bg-green-500 disabled:bg-gray-300 transition-colors" {{ $item['jumlah_stok_barang'] == 0 ? 'disabled' : '' }}>
+                                    <span class="hidden sm:inline">Tambah</span>
                                 </button>
                             </form>
                         </div>
@@ -149,7 +149,7 @@
                 {{-- Header Keranjang --}}
                 <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50">
                     <h4 class="font-bold text-gray-800 flex items-center gap-2">
-                        <i class="fa-solid fa-cart-shopping text-blue-600"></i> Keranjang
+                        <i class="fa-solid fa-cart-shopping text-green-600"></i> Keranjang
                     </h4>
                     
                     {{-- Tombol Close (Hanya muncul di Mobile) --}}
@@ -160,7 +160,7 @@
 
                 @if(session('cart') && count(session('cart')) > 0)
                     @php $total_harga = 0; @endphp
-                    <form action="{{ route('penjualan.store') }}" method="POST" class="flex flex-col h-full overflow-hidden">
+                    <form action="{{ route('penjualan.store') }}" method="POST" class="flex flex-col h-full overflow-hidden" >
                         @csrf
                         
                         {{-- Scrollable Content --}}
@@ -221,8 +221,8 @@
                                 <button type="submit" formaction="{{ route('penjualan.cart.clear') }}" class="px-4 bg-white border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition shadow-sm">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
-                                <button type="submit" class="flex-1 bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                                    Bayar Sekarang <i class="fa-solid fa-arrow-right"></i>
+                                <button type="submit" class="flex-1 bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2" onclick="return confirm('Yakin ingin menyimpan transaksi ini?')">
+                                    Simpan
                                 </button>
                             </div>
                         </div>

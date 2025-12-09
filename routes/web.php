@@ -22,7 +22,7 @@ Route::middleware(['auth', 'hapus-sesi'])->group(function() {
     // Pemilik Toko
     Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna');
     Route::post('/pengguna/tambah-pengguna', [PenggunaController::class, 'tambahPengguna'])->name('pengguna.tambah');
-    Route::put('/pengguna/update/{pengguna}', [PenggunaController::class, 'update'])->name('pengguna.update');
+    Route::put('/pengguna/update/{pengguna}/{login}', [PenggunaController::class, 'update'])->name('pengguna.update');
     Route::delete('/pengguna/nonaktif/{pengguna}', [PenggunaController::class, 'statusUpdate'])->name('pengguna.hapus');
 
     // Kepala Toko
@@ -38,6 +38,8 @@ Route::middleware(['auth', 'hapus-sesi'])->group(function() {
     Route::post('/barang/tambah/supplier', [BarangController::class, 'tambahSupplier'])->name('barang.tambah-supplier');
     Route::delete('/barang/hapus/{barang}', [BarangController::class, 'delete'])->name('barang.hapus');
     Route::put('/barang/update/{barang}', [BarangController::class, 'update'])->name('barang.update');
+    Route::delete('/barang/hapus/supplier/{id}', [BarangController::class, 'hapusSupplier'])->name('barang.hapus-supplier');
+    Route::delete('/barang/hapus/kategori/{id}', [BarangController::class, 'hapusKategori'])->name('barang.hapus-kategori');
 
     Route::get('/daftar/pembelian', [PembelianController::class, 'daftarTransaksiPembelian'])->name('daftar.pembelian');
     Route::post('/daftar/pembelian/detail', [PembelianController::class, 'detailTransaksiPembelian'])->name('detail.pembelian');

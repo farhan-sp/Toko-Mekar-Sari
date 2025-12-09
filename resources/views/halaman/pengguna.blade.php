@@ -35,73 +35,162 @@
     </div>
 
     <!-- GRID CARD PENGGUNA -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @foreach($pengguna as $user)
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xl font-bold border border-gray-200">
-                        {{ substr($user['nama_pengguna'], 0, 1) }}
-                    </div>
-                    <div>
-                        <h5 class="font-bold text-gray-800">{{ $user['nama_pengguna'] }}</h5>
-                        <p class="text-xs text-gray-400 font-mono">{{ $user['username'] }}</p>
-                    </div>
-                </div>
-                
-                {{-- Badge Role --}}
-                @php
-                    $roleColor = match($user['tipe_pekerjaan']) {
-                        'Pemilik' => 'bg-purple-100 text-purple-700 border-purple-200',
-                        'Kepala Toko' => 'bg-blue-100 text-blue-700 border-blue-200',
-                        default => 'bg-orange-100 text-orange-700 border-orange-200',
-                    };
-                @endphp
-                <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md border {{ $roleColor }}">
-                    {{ $user['tipe_pekerjaan'] }}
-                </span>
-            </div>
+    @php
+        $currentId = Auth::user()->pengguna()->get()->first()->id_pengguna; // Sesuaikan dengan primary key di auth
+        
+        // Cari akun saya dari collection/array
+        $akunSaya = $pengguna->first(function($item) use ($currentId) {
+            return $item['id_pengguna'] == $currentId;
+        });
 
-            <div class="space-y-2 text-sm text-gray-600 mb-6">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-phone text-gray-400 w-4"></i>
-                    <span>{{ $user['kontak_pengguna'] }}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <i class="fa-regular fa-calendar text-gray-400 w-4"></i>
-                    <span>Terdaftar: {{ \Carbon\Carbon::parse($user['tanggal_daftar'])->format('d M Y') }}</span>
-                </div>
-            </div>
+        // Filter akun lain
+        $akunLain = $pengguna->filter(function($item) use ($currentId) {
+            return $item['id_pengguna'] != $currentId;
+        });
+    @endphp
+
+    <div class="space-y-8">
+        
+        {{-- BAGIAN 1: PROFIL SAYA --}}
+        @if($akunSaya)
+        <div>
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-user-circle text-blue-600"></i> Profil Saya
+            </h3>
             
-            <div class="flex gap-2 pt-4 border-t border-gray-100">
-                <button 
-                    type="button"
-                    {{-- 1. Set data selectedPengguna saat tombol Edit diklik --}}
-                    @click='selectedPengguna = @json($user); showEditModal = true'
-                    class="flex-1 bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-                >
-                    Edit
-                </button>
+            {{-- Grid Wrapper (Hanya 1 item, tapi tetap pakai grid agar lebar konsisten) --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-blue-50/50 p-6 rounded-xl shadow-sm border border-blue-200 hover:shadow-md transition-shadow relative overflow-hidden">
+                    {{-- Penanda Akun Aktif --}}
+                    <div class="absolute top-0 right-0 bg-blue-600 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold">
+                        ANDA
+                    </div>
 
-                {{-- 2. Form Delete dengan Route yang benar --}}
-                <form 
-                    action="{{ route('pengguna.hapus', $user->id_pengguna) }}" 
-                    method="POST" 
-                    class="flex-1"
-                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus akses pengguna ini?');"
-                >
-                    @csrf
-                    @method('DELETE')
-                    <button 
-                        type="submit" 
-                        class="w-full bg-red-50 text-red-600 border border-red-100 px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
-                    >
-                        Hapus
-                    </button>
-                </form>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl font-bold border border-blue-200">
+                                {{ substr($akunSaya['nama_pengguna'], 0, 1) }}
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-gray-800">{{ $akunSaya['nama_pengguna'] }}</h5>
+                                <p class="text-xs text-gray-500 font-mono">{{ $akunSaya['username'] }}</p>
+                            </div>
+                        </div>
+                        
+                        {{-- Badge Role --}}
+                        @php
+                            $roleColor = match($akunSaya['tipe_pekerjaan']) {
+                                'Pemilik' => 'bg-purple-100 text-purple-700 border-purple-200',
+                                'Kepala Toko' => 'bg-blue-100 text-blue-700 border-blue-200',
+                                default => 'bg-orange-100 text-orange-700 border-orange-200',
+                            };
+                        @endphp
+                        <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md border {{ $roleColor }} mr-8">
+                            {{ $akunSaya['tipe_pekerjaan'] }}
+                        </span>
+                    </div>
+
+                    <div class="space-y-2 text-sm text-gray-600 mb-6">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-phone text-gray-400 w-4"></i>
+                            <span>{{ $akunSaya['kontak_pengguna'] }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fa-regular fa-calendar text-gray-400 w-4"></i>
+                            <span>Terdaftar: {{ \Carbon\Carbon::parse($akunSaya['tanggal_daftar'])->format('d M Y') }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 pt-4 border-t border-blue-100">
+                        <button 
+                            type="button"
+                            @click='selectedPengguna = @json($akunSaya); showEditModal = true'
+                            class="w-full bg-blue-600 border border-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                        >
+                            Edit Profil
+                        </button>
+                        {{-- Tombol Hapus Dihilangkan untuk Akun Sendiri --}}
+                    </div>
+                </div>
             </div>
         </div>
-        @endforeach
+        @endif
+
+        <hr class="border-gray-200">
+
+        {{-- BAGIAN 2: PENGGUNA LAIN --}}
+        <div>
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-users text-gray-500"></i> Pengguna Lainnya
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($akunLain as $user)
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xl font-bold border border-gray-200">
+                                {{ substr($user['nama_pengguna'], 0, 1) }}
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-gray-800">{{ $user['nama_pengguna'] }}</h5>
+                                <p class="text-xs text-gray-400 font-mono">{{ $user['username'] }}</p>
+                            </div>
+                        </div>
+                        
+                        {{-- Badge Role --}}
+                        @php
+                            $roleColor = match($user['tipe_pekerjaan']) {
+                                'Pemilik' => 'bg-purple-100 text-purple-700 border-purple-200',
+                                'Kepala Toko' => 'bg-blue-100 text-blue-700 border-blue-200',
+                                default => 'bg-orange-100 text-orange-700 border-orange-200',
+                            };
+                        @endphp
+                        <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md border {{ $roleColor }}">
+                            {{ $user['tipe_pekerjaan'] }}
+                        </span>
+                    </div>
+
+                    <div class="space-y-2 text-sm text-gray-600 mb-6">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-phone text-gray-400 w-4"></i>
+                            <span>{{ $user['kontak_pengguna'] }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fa-regular fa-calendar text-gray-400 w-4"></i>
+                            <span>Terdaftar: {{ \Carbon\Carbon::parse($user['tanggal_daftar'])->format('d M Y') }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 pt-4 border-t border-gray-100">
+                        <button 
+                            type="button"
+                            @click='selectedPengguna = @json($user); showEditModal = true'
+                            class="flex-1 bg-blue-600 border border-gray-300 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-500 transition-colors"
+                        >
+                            Edit
+                        </button>
+
+                        <form 
+                            action="{{ route('pengguna.hapus', $user->id_pengguna) }}" 
+                            method="POST" 
+                            class="flex-1"
+                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus akses pengguna ini?');"
+                        >
+                            @csrf
+                            @method('DELETE')
+                            <button 
+                                type="submit" 
+                                class="w-full bg-red-500 text-white border border-red-100 px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-400 transition-colors"
+                            >
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
     </div>
 
     {{-- ================= MODAL TAMBAH (MULTI-STEP) ================= --}}
@@ -219,12 +308,7 @@
                 </button>
             </div>
 
-            {{-- 
-                PERBAIKAN UTAMA:
-                1. Action form dinamis menggunakan :action (concat string JS).
-                2. Menggunakan x-model yang terikat ke selectedPengguna untuk mengisi value otomatis.
-            --}}
-            <form :action="'/pengguna/update/' + (selectedPengguna ? selectedPengguna.id_pengguna : '')" method="POST"> 
+            <form :action="'/pengguna/update/' + (selectedPengguna ? selectedPengguna.id_pengguna + '/' + selectedPengguna.id_login : '')" method="POST"> 
                 @csrf
                 @method('PUT')
                 
@@ -232,7 +316,6 @@
                     <!-- Nama -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                        {{-- Gunakan :value untuk mengisi data awal dari selectedPengguna --}}
                         <input type="text" name="nama" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" 
                             x-model="selectedPengguna && selectedPengguna.nama_pengguna" required>
                     </div>
@@ -254,10 +337,57 @@
                         <input type="tel" name="telepon" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500" 
                             x-model="selectedPengguna && selectedPengguna.kontak_pengguna" required>
                     </div>
-                    
-                    <!-- Note Password -->
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs text-yellow-800">
-                        <i class="fa-solid fa-lock mr-1"></i> Password tidak dapat diubah dari menu ini. Minta pengguna untuk mereset password jika lupa.
+
+                    {{-- Container khusus Login Info dengan State Alpine.js --}}
+                    <div x-data="{ ubahLogin: false }" class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h6 class="font-bold text-gray-700 text-sm">Informasi Login</h6>
+                                <p class="text-xs text-gray-500" x-show="!ubahLogin">Username & Password aman.</p>
+                            </div>
+                            
+                            {{-- Tombol Toggle --}}
+                            <button 
+                                type="button" 
+                                @click="ubahLogin = !ubahLogin"
+                                class="text-xs font-bold px-3 py-1.5 rounded transition-colors"
+                                :class="ubahLogin ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'"
+                            >
+                                <span x-text="ubahLogin ? 'Batal Ubah' : 'Ubah Akun'"></span>
+                            </button>
+                        </div>
+
+                        {{-- Form Input (Muncul hanya jika ubahLogin == true) --}}
+                        <div x-show="ubahLogin" x-transition.opacity class="mt-4 pt-4 border-t border-gray-200 space-y-4">
+                            
+                            {{-- Input Username --}}
+                            <div>
+                                <label class="block text-gray-700 text-xs font-bold mb-1">Username Baru</label>
+                                <input 
+                                    type="text" 
+                                    name="username" 
+                                    x-model="selectedPengguna.username"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
+                                >
+                            </div>
+
+                            {{-- Input Password --}}
+                            <div>
+                                <label class="block text-gray-700 text-xs font-bold mb-1">Password Baru</label>
+                                <input 
+                                    type="password" 
+                                    name="password" 
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Biarkan kosong jika tidak ingin mengganti"
+                                >
+                                <p class="text-[10px] text-gray-500 mt-1">
+                                    <i class="fa-solid fa-circle-info mr-1"></i>
+                                    Isi hanya jika Anda ingin mereset password user ini.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
