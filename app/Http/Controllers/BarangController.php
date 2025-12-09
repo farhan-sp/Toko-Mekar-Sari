@@ -49,11 +49,11 @@ class BarangController
             ]);
 
             if ($request->hasFile('gambar')) {
-                if ($barang->gambar_barang && \Storage::disk('public')->exists($barang->gambar_barang)) {
-                    \Storage::disk('public')->delete($barang->gambar_barang);
+                if ($barang->gambar_barang && \Storage::disk('public_html')->exists($barang->gambar_barang)) {
+                    \Storage::disk('public_html')->delete($barang->gambar_barang);
                 }
 
-                $path = $request->file('gambar')->store('produk', 'public');
+                $path = $request->file('gambar')->store('produk', 'public_html');
                 $barang->update([
                     'gambar_barang' => $path
                 ]);
