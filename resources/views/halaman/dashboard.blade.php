@@ -12,7 +12,7 @@
         <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow duration-300">
             <div class="flex justify-between items-start">
                 <div>
-                    <p class="text-gray-500 text-xs font-medium uppercase tracking-wider">Total Penjualan</p>
+                    <p class="text-gray-500 text-xs font-medium uppercase tracking-wider">Total........ Penjualan</p>
                     <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ $total_pendapatan }}</h3>
                 </div>
                 <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
