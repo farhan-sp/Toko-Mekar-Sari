@@ -171,7 +171,7 @@
                                 <h5 class="text-xs font-bold text-blue-800 uppercase mb-2 flex items-center gap-1">
                                     <i class="fa-regular fa-id-card"></i> Info Pelanggan
                                 </h5>
-                                <input type="text" name="nama" class="w-full border-gray-200 rounded-lg text-sm mb-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Nama Pelanggan (Wajib)">
+                                <input type="text" name="nama" class="w-full border-gray-200 rounded-lg text-sm mb-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Nama Pelanggan" required>
                                 <div class="flex gap-2">
                                     <input type="text" name="telepon" class="w-1/2 border-gray-200 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="No HP">
                                     <input type="text" name="alamat" class="w-1/2 border-gray-200 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Alamat">
@@ -202,6 +202,7 @@
                                         formaction="{{ route('penjualan.cart.remove', $id) }}"
                                         class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                         title="Hapus Barang"
+                                        formnovalidate
                                     >
                                         <i class="fa-solid fa-trash-can"></i>
                                     </button>
@@ -217,10 +218,6 @@
                                 <span class="text-2xl font-bold text-gray-800">Rp {{ number_format($total_harga, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex gap-2">
-                                {{-- Tombol Batal --}}
-                                <button type="submit" formaction="{{ route('penjualan.cart.clear') }}" class="px-4 bg-white border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition shadow-sm">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
                                 <button type="submit" class="flex-1 bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2" onclick="return confirm('Yakin ingin menyimpan transaksi ini?')">
                                     Simpan
                                 </button>

@@ -111,7 +111,9 @@
                         <i class="fa-solid fa-boxes-stacked w-6 text-center mr-2 {{ request()->routeIs('barang.*') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500' }}"></i>
                         Data Barang
                     </a>
+                @endif
 
+                @if ($role === 'pemilik')
                     <div class="pt-4 pb-2">
                         <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Pengaturan</p>
                     </div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\BatasanPengguna;
 use App\Http\Middleware\HapusSesi;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'hapus-sesi' => HapusSesi::class,
+            'batasan' => BatasanPengguna::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

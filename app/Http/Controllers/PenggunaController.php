@@ -55,6 +55,14 @@ class PenggunaController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
+            $cekUsername = LoginModel::where('username', $request->username)->exists();
+
+            if ($cekUsername) {
+                // Jika ada, batalkan proses dan kembalikan error
+                return back()->with('error', 'Gagal! Username sudah digunakan. Silakan pilih username lain.'); 
+                // Note: Tidak perlu rollback karena belum ada data yang di-insert
+            }
+
             $pengguna = PenggunaModel::create([
                 'id_login' => $login->id_login,
                 'nama_pengguna' => $request->nama,
