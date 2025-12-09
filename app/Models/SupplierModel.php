@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+use App\Models\BarangModel;
 
 class SupplierModel extends Model
 {
@@ -17,5 +20,7 @@ class SupplierModel extends Model
         'nama_supplier',
         'kontak_supplier'
     ];
-    protected $keyType = "string";
+    public function barang(): HasMany {
+        return $this->hasMany(BarangModel::class, 'id_supplier', 'id_supplier');
+    }
 }

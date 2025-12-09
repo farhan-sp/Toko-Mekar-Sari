@@ -91,7 +91,7 @@
                     @click="showAddBarangModal = true; defaultKategoriId = '{{ $itemKategori->id_kategori }}'"
                     class="text-sm bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm"
                 >
-                    <i class="fa-solid fa-plus"></i>
+                    </i>
                     <span>Tambah Barang</span>
                 </button>
             </div>
@@ -191,7 +191,7 @@
                 @click="showAddKategoriModal = true"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition-all"
             >
-                <i class="fa-solid fa-plus"></i>
+                </i>
                 <span>Tambah Kategori Baru</span>
             </button>
         </div>
@@ -199,49 +199,236 @@
 
     {{-- ================= MODALS ================= --}}
 
-    <div x-show="showAddKategoriModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" style="display: none;">
-        <div @click.outside="showAddKategoriModal = false" class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div class="flex justify-between items-center p-4 border-b bg-gray-50">
-                <h4 class="font-bold text-gray-700">Tambah Kategori</h4>
-                <button @click="showAddKategoriModal = false" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+    <div 
+        x-show="showAddKategoriModal" 
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" 
+        style="display: none;"
+        {{-- Reset ke mode list saat modal ditutup --}}
+        x-transition.opacity
+    >
+        <div 
+            x-data="{ mode: 'list' }"
+            @click.outside="showAddKategoriModal = false; setTimeout(() => mode = 'list', 300)" 
+            class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]"
+        >
+            <div x-show="mode === 'list'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
+                
+                {{-- Header List --}}
+                <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+                    <h4 class="font-bold text-gray-700">Daftar Kategori</h4>
+                    <button @click="showAddKategoriModal = false" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                {{-- Body List (Scrollable) --}}
+                <div class="p-0 overflow-y-auto max-h-[60vh]">
+                    <ul class="divide-y divide-gray-100">
+                        @forelse($kategori_list as $k)
+                        <li class="p-4 hover:bg-gray-50 transition flex justify-between items-center group">
+                            <div class="flex-1">
+                                <p class="font-bold text-gray-800 text-sm">{{ $k->nama_kategori }}</p>
+                            </div>
+
+                            {{-- Action Buttons --}}
+                            <div class="flex items-center gap-2">
+                                
+                                {{-- Form Hapus --}}
+                                {{-- Pastikan route dan nama parameter ID sesuai dengan controller Anda --}}
+                                <form 
+                                    action="{{ route('barang.hapus-kategori', $k->id_kategori) }}" 
+                                    method="POST" 
+                                    onsubmit="return confirm('Yakin ingin menghapus kategori {{ $k->nama_kategori }}? Data barang yang terhubung mungkin akan terpengaruh.');"
+                                >
+                                    @csrf
+                                    @method('DELETE')
+                                    
+                                    <button 
+                                        type="submit" 
+                                        title="Hapus Kategori"
+                                        class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                                    >
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+
+                            </div>
+                        </li>
+                        @empty
+                        <li class="p-8 text-center text-gray-400 flex flex-col items-center">
+                            <i class="fa-regular fa-folder-open text-3xl mb-2"></i>
+                            <span class="text-sm">Belum ada data kategori</span>
+                        </li>
+                        @endforelse
+                    </ul>
+                </div>
+
+                {{-- Footer List --}}
+                <div class="p-4 border-t bg-gray-50">
+                    <button 
+                        @click="mode = 'add'" 
+                        class="w-full py-2.5 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium shadow-sm flex items-center justify-center gap-2 transition-colors"
+                    >
+                        </i> Tambah Kategori Baru
+                    </button>
+                </div>
             </div>
-            <form action="{{ route('barang.tambah-kategori') }}" method="POST"> 
-                @csrf
-                <div class="p-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Kategori</label>
-                    <input type="text" name="nama_kategori" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: Semen, Cat" required>
+
+
+            {{-- =======================
+                TAMPILAN 2: FORM TAMBAH 
+                ======================= --}}
+            <div x-show="mode === 'add'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-10" x-transition:enter-end="opacity-100 translate-x-0" style="display: none;">
+                <div @click.outside="showAddKategoriModal = false" class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+                    <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+                        <h4 class="font-bold text-gray-700">Tambah Kategori</h4>
+                        <button @click="showAddKategoriModal = false" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <form action="{{ route('barang.tambah-kategori') }}" method="POST"> 
+                        @csrf
+                        <div class="p-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Kategori</label>
+                            <input type="text" name="nama_kategori" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: Semen, Cat" required>
+                        </div>
+                        <div class="p-4 border-t bg-gray-50 flex justify-end gap-2">
+                            <button type="button" @click="showAddKategoriModal = false" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 rounded-lg">Batal</button>
+                            <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium">Simpan</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="p-4 border-t bg-gray-50 flex justify-end gap-2">
-                    <button type="button" @click="showAddKategoriModal = false" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 rounded-lg">Batal</button>
-                    <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium">Simpan</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
-    <div x-show="showAddSupplierModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" style="display: none;">
-        <div @click.outside="showAddSupplierModal = false" class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div class="flex justify-between items-center p-4 border-b bg-gray-50">
-                <h4 class="font-bold text-gray-700">Tambah Supplier</h4>
-                <button @click="showAddSupplierModal = false" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+    <div 
+        x-show="showAddSupplierModal" 
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" 
+        style="display: none;"
+        x-transition.opacity
+    >
+        <div 
+            x-data="{ mode: 'list' }"
+            @click.outside="showAddSupplierModal = false; setTimeout(() => mode = 'list', 300)" 
+            class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]"
+        >
+            
+            {{-- =======================
+                TAMPILAN 1: DAFTAR SUPPLIER 
+                ======================= --}}
+            <div x-show="mode === 'list'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
+                
+                {{-- Header List --}}
+                <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+                    <h4 class="font-bold text-gray-700">Daftar Supplier</h4>
+                    <button @click="showAddSupplierModal = false" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                {{-- Body List (Scrollable) --}}
+                <div class="p-0 overflow-y-auto max-h-[60vh]">
+                    <ul class="divide-y divide-gray-100">
+                        {{-- Pastikan controller mengirim variabel $suppliers --}}
+                        @forelse($supplier_list as $s)
+                        <li class="p-4 hover:bg-gray-50 transition flex justify-between items-center group">
+                            {{-- Info Supplier --}}
+                            <div class="flex-1">
+                                <p class="font-bold text-gray-800 text-sm">{{ $s->nama_supplier }}</p>
+                                <p class="text-xs text-gray-500"><i class="fa-solid fa-phone mr-1"></i> {{ $s->kontak_supplier }}</p>
+                            </div>
+
+                            {{-- Action Buttons --}}
+                            <div class="flex items-center gap-2">
+                                
+                                {{-- Form Hapus --}}
+                                {{-- Pastikan route dan nama parameter ID sesuai dengan controller Anda --}}
+                                <form 
+                                    action="{{ route('barang.hapus-supplier', $s->id_supplier) }}" 
+                                    method="POST" 
+                                    onsubmit="return confirm('Yakin ingin menghapus supplier {{ $s->nama_supplier }}? Data barang yang terhubung mungkin akan terpengaruh.');"
+                                >
+                                    @csrf
+                                    @method('DELETE')
+                                    
+                                    <button 
+                                        type="submit" 
+                                        title="Hapus Supplier"
+                                        class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                                    >
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+
+                            </div>
+                        </li>
+                        @empty
+                        <li class="p-8 text-center text-gray-400 flex flex-col items-center">
+                            <i class="fa-regular fa-folder-open text-3xl mb-2"></i>
+                            <span class="text-sm">Belum ada data supplier</span>
+                        </li>
+                        @endforelse
+                    </ul>
+                </div>
+
+                {{-- Footer List --}}
+                <div class="p-4 border-t bg-gray-50">
+                    <button 
+                        @click="mode = 'add'" 
+                        class="w-full py-2.5 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium shadow-sm flex items-center justify-center gap-2 transition-colors"
+                    >
+                        </i> Tambah Supplier Baru
+                    </button>
+                </div>
             </div>
-            <form action="{{ route('barang.tambah-supplier') }}" method="POST"> 
-                @csrf
-                <div class="p-6 space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Supplier</label>
-                        <input type="text" name="nama" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" required>
+
+
+            {{-- =======================
+                TAMPILAN 2: FORM TAMBAH 
+                ======================= --}}
+            <div x-show="mode === 'add'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-10" x-transition:enter-end="opacity-100 translate-x-0" style="display: none;">
+                
+                {{-- Header Form --}}
+                <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+                    <div class="flex items-center gap-2">
+                        {{-- Tombol Kembali ke List --}}
+                        <button @click="mode = 'list'" class="text-gray-500 hover:text-blue-600 transition-colors">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <h4 class="font-bold text-gray-700">Supplier Baru</h4>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kontak / No HP</label>
-                        <input type="text" name="kontak" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" required>
+                    <button @click="showAddSupplierModal = false; setTimeout(() => mode = 'list', 300)" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                {{-- Form Input --}}
+                <form action="{{ route('barang.tambah-supplier') }}" method="POST"> 
+                    @csrf
+                    <div class="p-6 space-y-4">
+                        <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-2 flex gap-3 items-start">
+                            <i class="fa-solid fa-info-circle text-blue-500 mt-0.5"></i>
+                            <p class="text-xs text-blue-700 leading-relaxed">
+                                Supplier baru akan otomatis ditambahkan ke daftar setelah disimpan.
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Supplier <span class="text-red-500">*</span></label>
+                            <input type="text" name="nama" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400" placeholder="Contoh: PT. Semen Gresik" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kontak / No HP <span class="text-red-500">*</span></label>
+                            <input type="text" name="kontak" class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400" placeholder="0812..." required>
+                        </div>
                     </div>
-                </div>
-                <div class="p-4 border-t bg-gray-50 flex justify-end gap-2">
-                    <button type="button" @click="showAddSupplierModal = false" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 rounded-lg">Batal</button>
-                    <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium">Simpan</button>
-                </div>
-            </form>
+
+                    {{-- Footer Form --}}
+                    <div class="p-4 border-t bg-gray-50 flex justify-end gap-2">
+                        <button type="button" @click="mode = 'list'" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 rounded-lg transition-colors">Batal</button>
+                        <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium shadow-sm transition-colors">Simpan Data</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

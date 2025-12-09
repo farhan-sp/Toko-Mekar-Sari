@@ -19,7 +19,7 @@ class PenggunaController extends Controller
 {
     public function index() {
         $id_saya = Auth::user()->id_login; 
-        $data = PenggunaModel::where('id_login', '!=', $id_saya)->get();
+        $data = PenggunaModel::get();
 
         return view('halaman.pengguna', ['pengguna' => $data]);
     }
@@ -102,14 +102,20 @@ class PenggunaController extends Controller
             return back()->with('error', 'Gagal menghapus Pengguna: ' . $e->getMessage());
         }
     }
-    public function update(Request $request, PenggunaModel $pengguna)
+    public function update(Request $request, PenggunaModel $pengguna, LoginModel $login)
     {
         try {
             $pengguna->nama_pengguna = $request['nama'];
             $pengguna->tipe_pekerjaan = $request['pekerjaan'];
             $pengguna->kontak_pengguna = $request['telepon'];
 
+            if ($request->filled('password', 'username')) {
+                $login->username = $request->username;
+                $login->password = Hash::make($request->password);
+            } 
+
             $pengguna->save();
+            $login->save();
 
             return back()->with('success', 'Data pengguna berhasil diperbarui.');
         } catch (Exception $e) {
