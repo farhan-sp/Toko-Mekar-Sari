@@ -136,19 +136,16 @@
 
                 {{-- CONTAINER: Jika Critical, ubah background merah muda dan border merah tebal --}}
                 <div class="{{ $isCritical ? 'bg-red-50 border-red-500 shadow-md shadow-red-100' : 'bg-white border-gray-200 shadow-sm' }} rounded-lg lg:rounded-xl border hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden group">
-                    
-                    {{-- Gambar (Square Aspect Ratio) --}}
-                    {{-- Jika Critical, background container gambar disesuaikan sedikit agar menyatu --}}
                     <div class="aspect-square {{ $isCritical ? 'bg-red-50/50' : 'bg-white' }} relative overflow-hidden flex items-center justify-center p-2"> 
                         @if($item['gambar_barang'])
-                            <img src="{{ asset('storage/' . $item['gambar_barang']) }}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" alt="{{ $item['nama_barang'] }}">
+                            <img src="storage/app/public/{{ $item['gambar_barang'] }}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" alt="{{ $item['nama_barang'] }}">
                         @else
                             <div class="flex flex-col items-center justify-center text-gray-300">
                                 <i class="fa-regular fa-image text-3xl"></i>
                             </div>
                         @endif
                         
-                        {{-- Badge Stok --}}
+                        {{-- Badge --}}
                         <div class="absolute top-2 right-2">
                             {{-- Badge juga menyesuaikan, jika kritis background merah lebih gelap --}}
                             <span class="text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm {{ $isCritical ? 'bg-red-600 text-white animate-pulse' : 'bg-green-100 text-green-700' }}">
