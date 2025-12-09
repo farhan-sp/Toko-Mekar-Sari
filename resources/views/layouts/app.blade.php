@@ -25,7 +25,7 @@
             class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0 shadow-lg md:shadow-none flex flex-col"
         >
             <div class="flex items-center gap-3 p-6 border-b border-gray-100 h-20">
-                <img src="{{ asset('/build/assets/image/logo.png') }}" alt="Logo" class="w-10 h-10 rounded-lg object-cover">
+                <img src="{{ asset('/build/assets/images/logo.png') }}" alt="Logo" class="w-10 h-10 rounded-lg object-cover">
                 <div>
                     <h1 class="font-bold text-lg leading-tight text-gray-800">Mekar Sari</h1>
                     <p class="text-[10px] text-gray-500 uppercase tracking-wider">Toko Material Bangunan</p>
@@ -49,9 +49,6 @@
                     $role = strtolower($user->tipe_pekerjaan ?? ''); 
                 @endphp
 
-                {{-- ================================================= --}}
-                {{-- MENU YANG DISEMBUNYIKAN DARI KASIR --}}
-                {{-- ================================================= --}}
                 @if($role !== 'kasir')
                     <div class="pt-4 pb-2">
                         <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu Utama</p>
@@ -80,10 +77,6 @@
                         Riwayat Pembelian
                     </a>
                 @endif
-
-                {{-- ================================================= --}}
-                {{-- MENU UNTUK SEMUA ORANG (TERMASUK KASIR) --}}
-                {{-- ================================================= --}}
                 
                 {{-- Jika kasir login, beri judul Transaksi juga (karena blok diatas hilang) --}}
                 <div class="pt-4 pb-2">
@@ -99,9 +92,6 @@
                     Riwayat Penjualan
                 </a>
 
-                {{-- ================================================= --}}
-                {{-- MENU ADMIN LAINNYA (NON-KASIR) --}}
-                {{-- ================================================= --}}
                 @if($role !== 'kasir')
                     <div class="pt-4 pb-2">
                         <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Stok dan Barang</p>
