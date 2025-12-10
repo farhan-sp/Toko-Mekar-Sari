@@ -46,7 +46,7 @@ class PenjualanController extends Controller
         ]);
 
         if ($user->tipe_pekerjaan === 'Kasir') {
-            $query->where('id_pengguna', $user->id_pengguna); 
+            $query->where('id_pengguna_pembuat', $user->id_pengguna); 
         }
 
         $daftar_penjualan = $query->orderBy('tanggal_transaksi_penjualan', 'desc')->get();
