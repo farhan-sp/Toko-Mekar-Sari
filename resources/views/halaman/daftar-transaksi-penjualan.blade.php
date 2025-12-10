@@ -130,11 +130,19 @@
             </table>
         </div>
         
-        <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
-            <a href="{{ route('laporan') }}" class="text-sm font-medium text-gray-500 hover:text-gray-800 flex items-center gap-1 transition">
-                <i class="fa-solid fa-arrow-left"></i> Kembali ke Laporan
-            </a>
-        </div>
+        @if ( Auth::user()->pengguna()->get()->first()->tipe_pekerjaan !== "kasir" )
+            <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+                <a href="{{ route('laporan') }}" class="text-sm font-medium text-gray-500 hover:text-gray-800 flex items-center gap-1 transition">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Laporan
+                </a>
+            </div>
+        @else
+            <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+                <a href="{{ route('penjualan.index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-800 flex items-center gap-1 transition">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Penjualan
+                </a>
+            </div>
+        @endif
     </div>
 
     {{-- ================= MODAL DETAIL TRANSAKSI ================= --}}
