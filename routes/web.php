@@ -26,7 +26,7 @@ Route::middleware(['auth', 'hapus-sesi'])->group(function() {
         Route::put('/pengguna/update/{pengguna}/{login}', [PenggunaController::class, 'update'])->name('pengguna.update');
         Route::delete('/pengguna/nonaktif/{pengguna}', [PenggunaController::class, 'statusUpdate'])->name('pengguna.hapus');
     });
-    Route::middleware(['batasan:Pemilik, Kepala Toko'])->group(function() {
+    Route::middleware(['batasan:Pemilik,Kepala Toko'])->group(function() {
         // Kepala Toko
         Route::get('/dashboard', [LaporanController::class, 'dashboard'])->name('dashboard');
         Route::get('/laporan', [LaporanController::class, 'laporan'])->name('laporan');
