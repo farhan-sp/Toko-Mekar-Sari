@@ -118,7 +118,7 @@
             {{-- Profil User (Dinamis sesuai yang login) --}}
             <div class="p-4 border-t border-gray-200">
                 <div class="flex items-center gap-3">
-                    <img src='/build/assets/image/blank-profile.png' alt="User" class="w-9 h-9 rounded-full border border-gray-200">
+                    <i class="fa-solid fa-user"></i>
                     <div class="flex-1 min-w-0">
                         {{-- Tampilkan Nama Asli yang login --}}
                         <p class="text-sm font-medium text-gray-900 truncate">
