@@ -130,7 +130,11 @@
             </table>
         </div>
         
-        @if ( Auth::user()->pengguna()->get()->first()->tipe_pekerjaan !== "kasir" )
+        @php
+            $role = optional(Auth::user()->pengguna)->tipe_pekerjaan;
+        @endphp
+
+        @if ( strtolower($role) !== "kasir" )
             <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
                 <a href="{{ route('laporan') }}" class="text-sm font-medium text-gray-500 hover:text-gray-800 flex items-center gap-1 transition">
                     <i class="fa-solid fa-arrow-left"></i> Kembali ke Laporan
