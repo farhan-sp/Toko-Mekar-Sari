@@ -37,11 +37,19 @@ class PenjualanController extends Controller
     
     // Penjualan
     public function daftarTransaksiPenjualan() {
-        $daftar_penjualan = TransaksiPenjualanModel::with([
+        $user = Auth::user()->pengguna()->get()->first();
+
+        $query = TransaksiPenjualanModel::with([
             'pelanggan', 
             'pengguna', 
             'detailPenjualan.barang'
-        ])->orderBy('tanggal_transaksi_penjualan', 'desc')->get();
+        ]);
+
+        if ($user->tipe_pekerjaan === 'Kasir') {
+            $query->where('id_pengguna', $user->id_pengguna_pembuat); 
+        }
+
+        $daftar_penjualan = $query->orderBy('tanggal_transaksi_penjualan', 'desc')->get();
 
         return view('halaman.daftar-transaksi-penjualan', ['daftar_penjualan' => $daftar_penjualan]);
     }
